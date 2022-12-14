@@ -1,0 +1,10 @@
+{
+ :output-to "todo.js"
+ :output-dir "out"
+ :main todo.core
+ :target :node-library
+ ;:target :bundle
+:bundle-cmd {:none ["npx" "webpack" "--mode=development"]
+             :default ["npx" "webpack" "--mode=production"]}
+ :closure-defines {cljs.core/*global* "window"}
+}

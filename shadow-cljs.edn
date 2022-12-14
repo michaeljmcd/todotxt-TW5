@@ -1,0 +1,19 @@
+;; shadow-cljs configuration
+{:source-paths ["src"]
+ :dependencies
+ []
+
+ :builds {
+          :app1 {:target :esm
+                :modules {:app {:entries [todo.core]}}
+                :output-dir "js"
+                :exports {todo todo.core}
+                }
+          :app2 {:target :browser
+                 :output-to "todo.js"
+                 :modules {:app {:entries [todo.core]}}
+                 :exports {todo todo.core}
+                 :compiler-options {:output-wrapper true}
+                }
+          }
+ }

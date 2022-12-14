@@ -1,0 +1,13 @@
+{
+  "name": "todotxt",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "https://github.com/michaeljmcd/todotxt-TW5",
+  "author": "Michael McDermott <michael.mcdermott@jbhunt.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "shadow-cljs": "^2.20.14",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

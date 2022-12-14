@@ -1,0 +1,10 @@
+{
+    "title": "$:/plugins/michaeljmcd/todotxt",
+    "name": "todotxt",
+    "description": "A plugin for working with todo.txt lists in TiddlyWiki."
+    "author": "Michael McDermott",
+    "version": "0.1.0",
+    "core-version": ">=5.0.8",
+    "source": "https://github.com/michaeljmcd/todotxt-TW5",
+    "plugin-type": "plugin"
+}

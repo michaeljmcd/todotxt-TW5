@@ -1,0 +1,10 @@
+{:paths ["src"]
+ :deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
+        github-michaeljmcd/edessa {:git/url "https://github.com/michaeljmcd/edessa"
+                                   :sha "5595fd270c6d5117501d5025782c3942f3f5cf01"}}
+ :aliases {
+            :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "2.2.970"}}
+                     :main-opts ["-m" "antq.core"]}
+            :cljfmt {:extra-deps {cljfmt/cljfmt {:mvn/version "0.9.0"}}
+                     :main-opts ["-m" "cljfmt.main"]}
+           }}
