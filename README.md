@@ -7,5 +7,14 @@ The plugin itself is written in [ClojureScript](https://clojurescript.org).
 
 To build:
 
+    # In plugins/michaeljmcd/todotxt-dev
     yarn install
-    clj -M -m cljs.main -co build.edn -O advanced --compile
+    # clj -M -m cljs.main -co build.edn -O advanced --compile
+    npx shadow-cljs release app2
+    ./export.sh
+
+    # At TW5 top level:
+    node ./tiddlywiki.js editions/empty --build index
+
+The shell script at the end picks apart the directory and makes a fair copy
+before running.
