@@ -1,5 +1,6 @@
 (ns todo.core
-  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times]]))
+  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times]]
+            [cljs-time.format :as tf]))
 
 (defn ^:export hello []
   (print "Hello world"))
@@ -19,12 +20,14 @@
 (def dash (match \-))
 
 (def a-date
-  (then
-    (times 4 digit)
-    dash
-    (times 2 digit)
-    dash
-    (times 2 digit)))
+  (parser
+    (then
+      (times 4 digit)
+      dash
+      (times 2 digit)
+      dash
+      (times 2 digit))
+    :using (fn [x] (tf/parse (apply str x)))))
 
 (def priority 
   (parser
@@ -34,7 +37,9 @@
       (discard (match \))))
     :using (fn [x] {:priority (first x)})))
 
-(def completion (match \x))
+(def completion 
+  (parser (match \x)
+          :using (fn [_] {:complete true})))
 
 (def dates
   (choice (then a-date (discard non-breaking-ws) a-date)

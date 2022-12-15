@@ -3,9 +3,12 @@
             [edessa.parser :refer [apply-parser make-input success? result]]
             [clojure.pprint :refer [pprint]]
             [taoensso.timbre :as t :refer [debug error info merge-config!]]
+            [cljs-time.extend :as te]
+            [cljs-time.core :as tc]
             [todo.core :as c]))
 
-(merge-config! {:min-level :error :appenders {:println (t/println-appender {:stream *err*})}})
+(merge-config! {:min-level :error})
+;:appenders {:println (t/println-appender {:stream *err*})}})
 
 (def fs (js/require "fs"))
 
@@ -40,3 +43,10 @@
              :error nil,
              :failed false}
            r))))
+
+(deftest date-test
+  (let [inp (make-input "1982-03-12")
+        r (apply-parser c/a-date inp)]
+    (is (success? r))
+    (is (tc/= (tc/date-time 1982 3 12)
+           (first (result r))))))

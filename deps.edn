@@ -1,6 +1,7 @@
 {:paths ["src" "test"]
  :deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
         thheller/shadow-cljs {:mvn/version "2.20.14"}
+        com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
         github-michaeljmcd/edessa {:git/url "https://github.com/michaeljmcd/edessa"
                                    ;:sha "5595fd270c6d5117501d5025782c3942f3f5cf01"
                                    ;:sha "3fcfc7518016662f225e234eb70d09ce0485f278"
