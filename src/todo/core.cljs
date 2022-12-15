@@ -1,5 +1,5 @@
 (ns todo.core
-  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus]]))
+  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times]]))
 
 (defn ^:export hello []
   (print "Hello world"))
@@ -15,22 +15,19 @@
 
 (def a-date
   (then
-    digit
-    digit
-    digit
-    digit
+    (times 4 digit)
     dash
-    digit
-    digit
+    (times 2 digit)
     dash
-    digit
-    digit))
+    (times 2 digit)))
 
 (def priority 
-  (then
-      (match \()
+  (parser
+    (then
+      (discard (match \())
       ucase-letter
-      (match \))))
+      (discard (match \))))
+    :using (fn [x] {:priority (first x)})))
 
 (def completion (match \x))
 
