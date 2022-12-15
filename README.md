@@ -18,3 +18,7 @@ To build:
 
 The shell script at the end picks apart the directory and makes a fair copy
 before running.
+
+To run tests, first compile the tests down to node and run them.
+
+    npx shadow-cljs compile test && node out/node-tests.js 

@@ -8,7 +8,6 @@
             [todo.core :as c]))
 
 (merge-config! {:min-level :error})
-;:appenders {:println (t/println-appender {:stream *err*})}})
 
 (def fs (js/require "fs"))
 
