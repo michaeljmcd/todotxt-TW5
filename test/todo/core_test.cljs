@@ -30,6 +30,23 @@
       (is (= '({:priority "A" :description "test"})
              (result res)))))
 
+(deftest date-line-test
+  (let [inp (make-input "2021-01-01 Get stuff")
+        res (apply-parser c/todo-line inp)
+        data (first (result res))]
+    (is (success? res))
+    (is (not (contains? data :completion-date)))
+    (is (tc/= (tc/date-time 2021 1 1) (:creation-date data)))
+    (is (= "Get stuff" (:description data))))
+
+  (let [inp (make-input "2021-03-01 2021-01-01 Get stuff")
+        res (apply-parser c/todo-line inp)
+        data (first (result res))]
+    (is (success? res))
+    (is (tc/= (tc/date-time 2021 3 1) (:completion-date data)))
+    (is (tc/= (tc/date-time 2021 1 1) (:creation-date data)))
+    (is (= "Get stuff" (:description data)))))
+
 ; Low level parser tests
 (deftest priority-test
   (let [inp (make-input "(A)")

@@ -42,8 +42,9 @@
           :using (fn [_] {:complete true})))
 
 (def dates
-  (choice (then a-date (discard non-breaking-ws) a-date)
-          (then a-date)))
+  (choice (parser (then a-date (discard non-breaking-ws) a-date)
+                  :using (fn [x] {:completion-date (first x) :creation-date (second x)}))
+          (parser a-date :using (fn [x] {:creation-date (first x)}))))
 
 (def description
   (parser
