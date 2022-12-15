@@ -9,6 +9,11 @@
   (parser (one-of [\space \tab])
           :name "Non-breaking whitespace"))
 
+(def nl
+  (parser (match \newline)
+          :name "Newline"
+          :using (fn [_] {:type :newline :value (str \newline)})))
+
 (def ucase-letter (one-of "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
 (def digit (one-of "0123456789"))
 (def dash (match \-))
@@ -36,21 +41,26 @@
           (then a-date)))
 
 (def description
-  (plus (not-one-of [\newline])))
+  (parser
+    (plus (not-one-of [\newline]))
+    :using (fn [x] {:description (apply str x)})))
 
 (def todo-line 
   (parser
     (then
       (optional completion)
-      (discard non-breaking-ws)
+      (discard (star non-breaking-ws))
       (optional priority)
-      (discard non-breaking-ws)
+      (discard (star non-breaking-ws))
       (optional dates)
-      (discard non-breaking-ws)
+      (discard (star non-breaking-ws))
       description)
-    ))
+    :using (fn [x] (apply merge x))))
 
-(def todos (star todo-line))
+(def todos
+  (star
+    (then todo-line
+          (discard (optional nl)))))
 
 (defn parse-todos [text]
   (apply-parser todos text))
