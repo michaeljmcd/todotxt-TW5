@@ -196,34 +196,51 @@
 (defn priority-cell [todo]
      (assoc cell :children [{:type "text" :text (:priority todo)}]))
 
+(defn completion-date-cell [todo]
+  (if (contains? todo :completion-date)
+    (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:completion-date todo))}])
+    (assoc cell :children [{:type "text" :text ""}])
+    ))
+
+(defn creation-date-cell [todo]
+  (if (contains? todo :creation-date)
+    (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:creation-date todo))}])
+    (assoc cell :children [{:type "text" :text ""}])
+    ))
+
 (defn convert-todo [todo]
    (assoc row
           :children
           [
            (completion-cell todo)
            (priority-cell todo)
+           (completion-date-cell todo)
+           (creation-date-cell todo)
            ]))
 
-(def header [
-  {:type "raw" :html "<table>"}
-  {:type "raw" :html "<thead>
-                       <tr>
-                         <td>Complete?</td>
-                         <td>Priority</td>
-                         <td>Completed At</td>
-                         <td>Created At</td>
-                         <td>Description</td>
-                       </tr>
-                     </thead>"}])
-
-(def footer [{:type "raw" :html "</table>"}])
+(def header 
+  {:type "element"
+         :tag "table"
+         :children [
+                    {:type "element" :tag "thead"
+                     :children [
+                        {:type "element" :tag "tr"
+                         :children [
+                              {:type "element" :tag "td" :children [{:type "text" :text "Complete?"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Priority"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Completed At"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Created At"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Description"}]}
+                              ]}]}
+                    ]})
 
 (defn convert-parse-tree [todos]
   (if (empty? todos)
     [{:type "text" :text "Nothing to do!"}]
-    (concat header 
-            (map convert-todo todos)
-            footer)))
+    [(assoc header
+           :children
+           (concat (:children header)
+                    (map convert-todo todos)))]))
 
 (defn ^:export parse-todos [text]
   (clj->js (apply-parser todos text)))
