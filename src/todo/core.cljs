@@ -77,8 +77,7 @@
 (def custom-value
   (parser 
     (plus (not-one-of [\space \tab \newline]))
-    :using (fn [x] (stringify x))
-    ))
+    :using stringify))
 
 (def custom-field
   (parser
@@ -86,7 +85,7 @@
       identifier
       (discard (match \:))
       custom-value)
-    :using (fn [x] {:custom-field (apply (partial assoc {}) x)})))
+    :using (fn [x] (apply (partial assoc {}) x))))
 
 (def description-text
   (parser
@@ -95,16 +94,35 @@
         (then (one-of [\@ \+])
               (not-one-of (concat UCASE-LETTERS LCASE-LETTERS [\newline])))
         (not-one-of [\newline \@ \+])))
-    :using (fn [x] (stringify x))))
+    :using stringify))
+
+(def description-content
+  (parser
+      (plus
+        (choice
+          description-text
+          context-tag
+          project-tag))
+      :using (fn [x] {:description (into [] x)})))
+
+(def custom-fields
+  (parser
+    (star 
+      (then
+        custom-field
+        (discard (star non-breaking-ws))))
+    :using (fn [x] {:fields (apply merge x)})))
 
 (def description
   (parser
-    (plus
-      (choice
-        description-text
-        context-tag
-        project-tag))
-    :using (fn [x] {:description (into [] x)})))
+    (then
+      description-content
+      custom-fields)
+  :using (fn [x]
+           (apply merge 
+                  (filter (fn [x] (or (not (contains? x :fields))
+                                      (not (nil? (:fields x))))) x))
+           )))
 
 (def todo-line 
   (parser

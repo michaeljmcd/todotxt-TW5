@@ -12,14 +12,22 @@
 (def fs (js/require "fs"))
 
 (defn load-resource [p]
-  (.readFileSync fs p))
+  (str (.readFileSync fs p)))
 
-(deftest parser-test
-  (let [inp (make-input (str (load-resource "test-resources/simple.txt")))
+(deftest simple-test
+  (let [inp (make-input (load-resource "test-resources/simple.txt"))
         res (apply-parser c/todos inp)]
     (is (success? res))
     (is (= '({:priority "A" :description ["Fix your stuff dude."]}
              {:priority "Z" :description ["Get ice cream."]})
+           (result res)))))
+
+(deftest custom-field-file-test
+  (let [inp (make-input (load-resource "test-resources/custom-field.txt"))
+        res (apply-parser c/todos inp)]
+    (is (success? res))
+    (is (= '({:priority "Z" :description ["Do something."] :fields {"due" "2022-01-01" "BADGE" "fOO"}}
+             {:priority "B" :description ["Do something else!"] :fields {"due" "2022-03-01"}})
            (result res)))))
 
 (deftest simple-line-test
@@ -112,5 +120,5 @@
   (let [inp (make-input "Age:3rd")
         r (apply-parser c/custom-field inp)]
     (is (success? r))
-    (is (= {:custom-field {"Age" "3rd"}}
+    (is (= {"Age" "3rd"}
            (first (result r))))))
