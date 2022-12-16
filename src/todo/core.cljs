@@ -6,9 +6,6 @@
 
 (merge-config! {:min-level :error})
 
-(defn ^:export hello []
-  (print "Hello world"))
-
 ; Grammar definition
 (defn stringify [x]
   (apply str x))
@@ -154,6 +151,10 @@
 
 (defn convert-todo [todo]
   {:type "element" :tag "h1" :children [{:type "text" :text (first (:description todo))}]})
+
+(def header [
+  {:type "raw" html: "<table></table>"}
+ ])
 
 (defn convert-parse-tree [todos]
   (if (empty? todos)
