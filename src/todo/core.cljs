@@ -132,8 +132,6 @@
                  (assoc res :fields (apply merge fields)))))
     ))
 
-; end new descr
-
 (def todo-line 
   (parser
     (then
