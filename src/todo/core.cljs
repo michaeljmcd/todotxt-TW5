@@ -4,9 +4,34 @@
             [clojure.string :refer [trim]]
             [cljs-time.format :as tf]))
 
+; The main goal here is to write a plugin that can parser [TODO.txt](https://github.com/todotxt/todo.txt)
+; and render it as HTML within TiddlyWiki 5. This module will have all of the
+; parsing and HTML 5 generation in it. There will be separate `.js` files to act
+; as the glue between the core module and TiddlyWiki itself. Most importantly,
+; one of those is the parser module that needs to be registered for the custom
+; format to be rendered.
+
+; Disable verbose logging from Edessa.
 (merge-config! {:min-level :error})
 
-; Grammar definition
+; Grammar definition.
+; The grammar here is built up on the (Edessa)[https://github.com/michaeljmcd/edessa] parser 
+; combinator library. The format being parsed is linked above. What we are after
+; is a list of todo entries, each of which follows the format below:
+;
+; {:complete true
+;  :priority "A"
+;  :creation-date "2021-01-01"
+;  :completion-date "2021-01-01"
+;  :description ["My text with" 
+;                {:project "project"}
+;                {:context "context"}
+;                "tags"]
+;  :fields {"due" "2021-01-01"}}
+;
+; The format closely mirrors what you would expect the biggest call-outs are
+; probably the separate tokenization of tags and fields. The idea here was to
+; make room for later pretty-rendering.
 (defn stringify [x]
   (apply str x))
 
@@ -149,24 +174,63 @@
     (then todo-line
           (discard (optional nl)))))
 
+; With the parsing business out of the way, we will turn towards wiki rendering.
+
+(def cell 
+      {:type "element"
+       :tag "td"
+       :children []})
+
+(def row 
+  {:type "element"
+   :tag "tr"
+   :children []})
+
+(defn completion-cell [todo]
+   (if (and (contains? todo :complete)
+            (:complete todo))
+     (assoc cell :children [{:type "raw" :html "&#x2611;"}])
+     (assoc cell :children [{:type "raw" :html "&#x2610;"}])
+     ))
+
+(defn priority-cell [todo]
+     (assoc cell :children [{:type "text" :text (:priority todo)}]))
+
 (defn convert-todo [todo]
-  {:type "element" :tag "h1" :children [{:type "text" :text (first (:description todo))}]})
+   (assoc row
+          :children
+          [
+           (completion-cell todo)
+           (priority-cell todo)
+           ]))
 
 (def header [
-  {:type "raw" :html "<table></table>"}
- ])
+  {:type "raw" :html "<table>"}
+  {:type "raw" :html "<thead>
+                       <tr>
+                         <td>Complete?</td>
+                         <td>Priority</td>
+                         <td>Completed At</td>
+                         <td>Created At</td>
+                         <td>Description</td>
+                       </tr>
+                     </thead>"}])
+
+(def footer [{:type "raw" :html "</table>"}])
 
 (defn convert-parse-tree [todos]
   (if (empty? todos)
     [{:type "text" :text "Nothing to do!"}]
-    (map convert-todo todos)))
+    (concat header 
+            (map convert-todo todos)
+            footer)))
 
 (defn ^:export parse-todos [text]
-  (apply-parser todos text))
+  (clj->js (apply-parser todos text)))
 
 (defn ^:export todo-to-wiki [text]
-  (let [res (parse-todos text)]
-    (-> res
-        result
-        convert-parse-tree
-        clj->js)))
+    (->> text
+         (apply-parser todos)
+         result
+         convert-parse-tree
+         clj->js))
