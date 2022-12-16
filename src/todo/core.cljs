@@ -6,11 +6,16 @@
   (print "Hello world"))
 
 ; Grammar definition
+(defn stringify [x]
+  (apply str x))
+
 (def non-breaking-ws
   (parser (one-of [\space \tab])
           :name "Non-breaking whitespace"))
 
 (def nl (match \newline))
+
+(def ws (choice non-breaking-ws nl))
 
 (def UCASE-LETTERS "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 (def LCASE-LETTERS "abcdefghijklmnopqrstuvwxyz")
@@ -29,7 +34,7 @@
       (times 2 digit)
       dash
       (times 2 digit))
-    :using (fn [x] (tf/parse (apply str x)))))
+    :using (fn [x] (tf/parse (stringify x)))))
 
 (def priority 
   (parser
@@ -48,21 +53,40 @@
                   :using (fn [x] {:completion-date (first x) :creation-date (second x)}))
           (parser a-date :using (fn [x] {:creation-date (first x)}))))
 
+(def identifier
+  (parser
+    (then 
+      (choice ucase-letter lcase-letter)
+      (star (choice ucase-letter lcase-letter digit dash underscore)))
+    :using stringify))
+
 (def project-tag
   (parser
     (then
       (discard (match \+))
-      (choice ucase-letter lcase-letter)
-      (star (choice ucase-letter lcase-letter digit dash underscore)))
-    :using (fn [x] {:project (apply str x)})))
+      identifier)
+    :using (fn [x] {:project (stringify x)})))
 
 (def context-tag 
   (parser
     (then
       (discard (match \@))
-      (choice ucase-letter lcase-letter)
-      (star (choice ucase-letter lcase-letter digit dash underscore)))
-    :using (fn [x] {:context (apply str x)})))
+      identifier)
+    :using (fn [x] {:context (stringify x)})))
+
+(def custom-value
+  (parser 
+    (plus (not-one-of [\space \tab \newline]))
+    :using (fn [x] (stringify x))
+    ))
+
+(def custom-field
+  (parser
+    (then
+      identifier
+      (discard (match \:))
+      custom-value)
+    :using (fn [x] {:custom-field (apply (partial assoc {}) x)})))
 
 (def description-text
   (parser
@@ -71,7 +95,7 @@
         (then (one-of [\@ \+])
               (not-one-of (concat UCASE-LETTERS LCASE-LETTERS [\newline])))
         (not-one-of [\newline \@ \+])))
-    :using (fn [x] (apply str x))))
+    :using (fn [x] (stringify x))))
 
 (def description
   (parser

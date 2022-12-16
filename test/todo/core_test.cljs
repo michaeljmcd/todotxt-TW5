@@ -54,8 +54,7 @@
     (is (success? r))
     (is (= '[{:priority "D"
               :description ["add 1 + 2"]}]
-           (result r))))
-  )
+           (result r)))))
 
 (deftest date-line-test
   (let [inp (make-input "2021-01-01 Get stuff")
@@ -107,4 +106,11 @@
         r (apply-parser c/context-tag inp)]
     (is (success? r))
     (is (= {:context "Foobar"}
+           (first (result r))))))
+
+(deftest custom-field-test
+  (let [inp (make-input "Age:3rd")
+        r (apply-parser c/custom-field inp)]
+    (is (success? r))
+    (is (= {:custom-field {"Age" "3rd"}}
            (first (result r))))))
