@@ -1,7 +1,10 @@
 (ns todo.core
-  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times using]]
+  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times using result]]
+            [taoensso.timbre :as t :refer [debug error info merge-config!]]
             [clojure.string :refer [trim]]
             [cljs-time.format :as tf]))
+
+(merge-config! {:min-level :error})
 
 (defn ^:export hello []
   (print "Hello world"))
@@ -149,5 +152,20 @@
     (then todo-line
           (discard (optional nl)))))
 
-(defn parse-todos [text]
+(defn convert-todo [todo]
+  {:type "element" :tag "h1" :children [{:type "text" :text (first (:description todo))}]})
+
+(defn convert-parse-tree [todos]
+  (if (empty? todos)
+    [{:type "text" :text "Nothing to do!"}]
+    (map convert-todo todos)))
+
+(defn ^:export parse-todos [text]
   (apply-parser todos text))
+
+(defn ^:export todo-to-wiki [text]
+  (let [res (parse-todos text)]
+    (-> res
+        result
+        convert-parse-tree
+        clj->js)))

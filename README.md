@@ -10,7 +10,7 @@ To build:
     # In plugins/michaeljmcd/todotxt-dev
     yarn install
     # clj -M -m cljs.main -co build.edn -O advanced --compile
-    npx shadow-cljs release app2
+    npx shadow-cljs release app
     ./export.sh
 
     # At TW5 top level:
