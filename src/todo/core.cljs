@@ -1,5 +1,6 @@
 (ns todo.core
-  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times]]
+  (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times using]]
+            [clojure.string :refer [trim]]
             [cljs-time.format :as tf]))
 
 (defn ^:export hello []
@@ -124,6 +125,75 @@
                                       (not (nil? (:fields x))))) x))
            )))
 
+; New descr
+
+(def description-token
+  (star
+    (choice
+      (using non-breaking-ws (fn [x] {:space (stringify x)}))
+      (using (match \@) (fn [_] :at))
+      (using (match \+) (fn [_] :plus))
+      (using (match \:) (fn [_] :colon))
+      (using (plus (not-one-of [\@ \+ \: \newline \tab \space]))
+             (fn [x] {:text (stringify x)}))
+      )))
+
+(def description-token2
+  (star
+    (choice 
+      context-tag
+      project-tag
+      custom-field
+      (using (plus (not-one-of [\newline \tab \space])) stringify)
+      non-breaking-ws
+      )))
+
+(defn- custom-field? [x] (and (map? x)
+                              (not (contains? x :project)) 
+                              (not (contains? x :context))))
+
+(defn str-accumulate [xs]
+  (letfn [(str-acc-inner [xs st res]
+            (cond
+              (empty? xs)
+                (if (empty? st)
+                  res
+                  (cons st res))
+              (string? (first xs))
+                (recur (rest xs)
+                       (str st (first xs))
+                       res)
+                :else
+                          (if (empty? st)
+                            (recur (rest xs) "" (cons (first xs) res))
+                            (recur (rest xs) "" (cons (first xs) (cons st res))))))]
+    (reverse (str-acc-inner xs "" []))
+  ))
+
+(def description-token3
+  (parser
+    (star
+      (choice 
+        context-tag
+        project-tag
+        custom-field
+        (using (plus (not-one-of [\newline \tab \space])) stringify)
+        non-breaking-ws
+        ))
+    :using (fn [x]
+             (let [res {:description (map (fn [x] (if (string? x)
+                                                    (trim x)
+                                                    x))
+                                          (str-accumulate (filter (comp not custom-field?) x)))
+                        }
+                   fields (filter custom-field? x)]
+               (if (empty? fields)
+                 res
+                 (assoc res :fields (apply merge fields)))))
+    ))
+
+; end new descr
+
 (def todo-line 
   (parser
     (then
@@ -133,7 +203,7 @@
       (discard (star non-breaking-ws))
       (optional dates)
       (discard (star non-breaking-ws))
-      description)
+      description-token3)
     :using (fn [x] (apply merge x))))
 
 (def todos

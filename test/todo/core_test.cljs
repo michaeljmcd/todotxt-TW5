@@ -42,9 +42,9 @@
         r (apply-parser c/todo-line inp)]
     (is (success? r))
     (is (= '[{:priority "D"
-              :description ["test "
+              :description ["test"
                             {:project "todo"}
-                            " in the "
+                            "in the"
                             {:context "cli"}]}]
            (result r))))
 
@@ -53,7 +53,7 @@
     (is (success? r))
     (is (= '[{:priority "D"
               :description [{:project "todo"}
-                            " test in the "
+                            "test in the"
                             {:context "cli"}]}]
            (result r))))
 
@@ -122,3 +122,11 @@
     (is (success? r))
     (is (= {"Age" "3rd"}
            (first (result r))))))
+
+; experimental
+
+(deftest description-token-scratch
+  (let [inp (make-input "measure space for +chapelShelving @chapel due:2016-05-30")
+        r (apply-parser c/description-token3 inp)]
+    (success? r)
+    ))
