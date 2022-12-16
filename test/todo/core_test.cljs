@@ -127,6 +127,6 @@
 
 (deftest description-token-scratch
   (let [inp (make-input "measure space for +chapelShelving @chapel due:2016-05-30")
-        r (apply-parser c/description-token3 inp)]
+        r (apply-parser c/description inp)]
     (success? r)
     ))

@@ -88,66 +88,6 @@
       custom-value)
     :using (fn [x] (apply (partial assoc {}) x))))
 
-(def description-text
-  (parser
-    (plus 
-      (choice 
-        (then (one-of [\@ \+])
-              (not-one-of (concat UCASE-LETTERS LCASE-LETTERS [\newline])))
-        (not-one-of [\newline \@ \+])))
-    :using stringify))
-
-(def description-content
-  (parser
-      (plus
-        (choice
-          description-text
-          context-tag
-          project-tag))
-      :using (fn [x] {:description (into [] x)})))
-
-(def custom-fields
-  (parser
-    (star 
-      (then
-        custom-field
-        (discard (star non-breaking-ws))))
-    :using (fn [x] {:fields (apply merge x)})))
-
-(def description
-  (parser
-    (then
-      description-content
-      custom-fields)
-  :using (fn [x]
-           (apply merge 
-                  (filter (fn [x] (or (not (contains? x :fields))
-                                      (not (nil? (:fields x))))) x))
-           )))
-
-; New descr
-
-(def description-token
-  (star
-    (choice
-      (using non-breaking-ws (fn [x] {:space (stringify x)}))
-      (using (match \@) (fn [_] :at))
-      (using (match \+) (fn [_] :plus))
-      (using (match \:) (fn [_] :colon))
-      (using (plus (not-one-of [\@ \+ \: \newline \tab \space]))
-             (fn [x] {:text (stringify x)}))
-      )))
-
-(def description-token2
-  (star
-    (choice 
-      context-tag
-      project-tag
-      custom-field
-      (using (plus (not-one-of [\newline \tab \space])) stringify)
-      non-breaking-ws
-      )))
-
 (defn- custom-field? [x] (and (map? x)
                               (not (contains? x :project)) 
                               (not (contains? x :context))))
@@ -170,7 +110,7 @@
     (reverse (str-acc-inner xs "" []))
   ))
 
-(def description-token3
+(def description
   (parser
     (star
       (choice 
@@ -203,7 +143,7 @@
       (discard (star non-breaking-ws))
       (optional dates)
       (discard (star non-breaking-ws))
-      description-token3)
+      description)
     :using (fn [x] (apply merge x))))
 
 (def todos
