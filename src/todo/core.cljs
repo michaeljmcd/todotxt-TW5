@@ -10,14 +10,16 @@
   (parser (one-of [\space \tab])
           :name "Non-breaking whitespace"))
 
-(def nl
-  (parser (match \newline)
-          :name "Newline"
-          :using (fn [_] {:type :newline :value (str \newline)})))
+(def nl (match \newline))
 
-(def ucase-letter (one-of "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+(def UCASE-LETTERS "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(def LCASE-LETTERS "abcdefghijklmnopqrstuvwxyz")
+
+(def ucase-letter (one-of UCASE-LETTERS))
+(def lcase-letter (one-of LCASE-LETTERS))
 (def digit (one-of "0123456789"))
 (def dash (match \-))
+(def underscore (match \_))
 
 (def a-date
   (parser
@@ -46,10 +48,39 @@
                   :using (fn [x] {:completion-date (first x) :creation-date (second x)}))
           (parser a-date :using (fn [x] {:creation-date (first x)}))))
 
+(def project-tag
+  (parser
+    (then
+      (discard (match \+))
+      (choice ucase-letter lcase-letter)
+      (star (choice ucase-letter lcase-letter digit dash underscore)))
+    :using (fn [x] {:project (apply str x)})))
+
+(def context-tag 
+  (parser
+    (then
+      (discard (match \@))
+      (choice ucase-letter lcase-letter)
+      (star (choice ucase-letter lcase-letter digit dash underscore)))
+    :using (fn [x] {:context (apply str x)})))
+
+(def description-text
+  (parser
+    (plus 
+      (choice 
+        (then (one-of [\@ \+])
+              (not-one-of (concat UCASE-LETTERS LCASE-LETTERS [\newline])))
+        (not-one-of [\newline \@ \+])))
+    :using (fn [x] (apply str x))))
+
 (def description
   (parser
-    (plus (not-one-of [\newline]))
-    :using (fn [x] {:description (apply str x)})))
+    (plus
+      (choice
+        description-text
+        context-tag
+        project-tag))
+    :using (fn [x] {:description (into [] x)})))
 
 (def todo-line 
   (parser

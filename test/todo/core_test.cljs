@@ -18,16 +18,44 @@
   (let [inp (make-input (str (load-resource "test-resources/simple.txt")))
         res (apply-parser c/todos inp)]
     (is (success? res))
-    (is (= '({:priority "A" :description "Fix your stuff dude."}
-             {:priority "Z" :description "Get ice cream."})
+    (is (= '({:priority "A" :description ["Fix your stuff dude."]}
+             {:priority "Z" :description ["Get ice cream."]})
            (result res)))))
 
 (deftest simple-line-test
   (let [inp (make-input "(A) test")
           res (apply-parser c/todo-line inp)]
       (is (success? res))
-      (is (= '({:priority "A" :description "test"})
+      (is (= '({:priority "A" :description ["test"]})
              (result res)))))
+
+(deftest tagged-line
+  (let [inp (make-input "(D) test +todo in the @cli")
+        r (apply-parser c/todo-line inp)]
+    (is (success? r))
+    (is (= '[{:priority "D"
+              :description ["test "
+                            {:project "todo"}
+                            " in the "
+                            {:context "cli"}]}]
+           (result r))))
+
+  (let [inp (make-input "(D) +todo test in the @cli")
+        r (apply-parser c/todo-line inp)]
+    (is (success? r))
+    (is (= '[{:priority "D"
+              :description [{:project "todo"}
+                            " test in the "
+                            {:context "cli"}]}]
+           (result r))))
+
+  (let [inp (make-input "(D) add 1 + 2")
+        r (apply-parser c/todo-line inp)]
+    (is (success? r))
+    (is (= '[{:priority "D"
+              :description ["add 1 + 2"]}]
+           (result r))))
+  )
 
 (deftest date-line-test
   (let [inp (make-input "2021-01-01 Get stuff")
@@ -36,7 +64,7 @@
     (is (success? res))
     (is (not (contains? data :completion-date)))
     (is (tc/= (tc/date-time 2021 1 1) (:creation-date data)))
-    (is (= "Get stuff" (:description data))))
+    (is (= ["Get stuff"] (:description data))))
 
   (let [inp (make-input "2021-03-01 2021-01-01 Get stuff")
         res (apply-parser c/todo-line inp)
@@ -44,7 +72,7 @@
     (is (success? res))
     (is (tc/= (tc/date-time 2021 3 1) (:completion-date data)))
     (is (tc/= (tc/date-time 2021 1 1) (:creation-date data)))
-    (is (= "Get stuff" (:description data)))))
+    (is (= ["Get stuff"] (:description data)))))
 
 ; Low level parser tests
 (deftest priority-test
@@ -65,4 +93,18 @@
         r (apply-parser c/a-date inp)]
     (is (success? r))
     (is (tc/= (tc/date-time 1982 3 12)
+           (first (result r))))))
+
+(deftest project-tag-test
+  (let [inp (make-input "+Foobar")
+        r (apply-parser c/project-tag inp)]
+    (is (success? r))
+    (is (= {:project "Foobar"}
+           (first (result r))))))
+
+(deftest context-tag-test
+  (let [inp (make-input "@Foobar")
+        r (apply-parser c/context-tag inp)]
+    (is (success? r))
+    (is (= {:context "Foobar"}
            (first (result r))))))
