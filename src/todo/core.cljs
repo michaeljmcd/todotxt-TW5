@@ -153,7 +153,7 @@
   {:type "element" :tag "h1" :children [{:type "text" :text (first (:description todo))}]})
 
 (def header [
-  {:type "raw" html: "<table></table>"}
+  {:type "raw" :html "<table></table>"}
  ])
 
 (defn convert-parse-tree [todos]
