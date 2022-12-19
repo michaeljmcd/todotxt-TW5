@@ -268,8 +268,8 @@
                          :children [
                               {:type "element" :tag "td" :children [{:type "text" :text "Complete?"}]}
                               {:type "element" :tag "td" :children [{:type "text" :text "Priority"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Created At"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Completed At"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Created"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Completed"}]}
                               {:type "element" :tag "td" :children [{:type "text" :text "Description"}]}
                               ]}]}
                     ]})
