@@ -186,6 +186,16 @@
    :tag "tr"
    :children []})
 
+(def text
+  {:type "text"
+   :text ""})
+
+(def span
+  {:type "element"
+   :tag "span"
+   :attributes {}
+   :children []})
+
 (defn completion-cell [todo]
    (if (and (contains? todo :complete)
             (:complete todo))
@@ -208,14 +218,44 @@
     (assoc cell :children [{:type "text" :text ""}])
     ))
 
+(defn span-text [txt cls]
+  (-> span
+     (assoc-in [:attributes :class] cls)
+     (assoc :children [(assoc text :text txt)])))
+
+(defn description-cell [todo]
+  (letfn [(descr-inner [todo fragments]
+            (let [elem (first todo)]
+              (cond
+                (empty? todo) fragments
+                (string? elem)
+                  (recur (rest todo)
+                         (cons (assoc text :text elem)
+                               fragments))
+                (contains? elem :project)
+                  (recur (rest todo)
+                         (cons (span-text (:project elem) "todo-project")
+                               (rest todo)))
+                (contains? elem :context)
+                  (recur (rest todo)
+                         (cons (span-text (:context elem) "todo-context")
+                               (rest todo)))
+                ; This exhausts valid options. If not, an error seems fair.
+                ))
+            )]
+    (assoc cell :children 
+      (descr-inner (:description todo) []))
+    ))
+
 (defn convert-todo [todo]
    (assoc row
           :children
           [
            (completion-cell todo)
            (priority-cell todo)
-           (completion-date-cell todo)
            (creation-date-cell todo)
+           (completion-date-cell todo)
+           (description-cell todo)
            ]))
 
 (def header 
@@ -228,8 +268,8 @@
                          :children [
                               {:type "element" :tag "td" :children [{:type "text" :text "Complete?"}]}
                               {:type "element" :tag "td" :children [{:type "text" :text "Priority"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Completed At"}]}
                               {:type "element" :tag "td" :children [{:type "text" :text "Created At"}]}
+                              {:type "element" :tag "td" :children [{:type "text" :text "Completed At"}]}
                               {:type "element" :tag "td" :children [{:type "text" :text "Description"}]}
                               ]}]}
                     ]})
