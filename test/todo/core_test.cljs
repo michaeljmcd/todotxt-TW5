@@ -131,7 +131,7 @@
 ; Wiki rendering tests
 
 (deftest description-generation
-  (let [todo {:description ["something about" {:project "myproject"}]}
+  (let [todo {:description ["something about" {:project "myproject"} "you see"]}
         r (c/description-cell todo)]
     (is (= {:type "element"
             :tag "td"
@@ -140,6 +140,7 @@
               {:type "element"
                :tag "span"
                :attributes {"class" "todo-project"}
-               :children [{:type "text" :text "myproject"}]}
+               :children [{:type "text" :text "myproject "}]}
+              {:type "text" :text "you see "}
             ]}
            r))))

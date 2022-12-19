@@ -214,7 +214,7 @@
 (defn span-text [txt cls]
   (-> span
       (assoc-in [:attributes "class"] cls)
-      (assoc :children [(assoc text :text txt)])))
+      (assoc :children [(assoc text :text (str txt " "))])))
 
 (defn description-cell [todo]
   (letfn [(descr-inner [todo fragments]
