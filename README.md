@@ -4,6 +4,12 @@ A todo.txt plugin for TiddlyWiki 5. This adds a new `text/x-todo` file type to
 the wiki that follows the [TODO.txt](https://github.com/todotxt/todo.txt)
 format.
 
+## CodeMirror
+
+CodeMirror will not activate on the new `x-todo` type by default. If you add a
+`$:/config/EditorTypeMappings/text/x-todo` with the content of `codemirror`
+after installation, the plugin will activate as normal.
+
 ## Development
 
 The plugin itself is written in [ClojureScript](https://clojurescript.org).

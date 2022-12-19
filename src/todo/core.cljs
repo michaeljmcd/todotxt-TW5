@@ -213,7 +213,7 @@
 
 (defn span-text [txt cls]
   (-> span
-      (assoc-in [:attributes :class] cls)
+      (assoc-in [:attributes "class"] cls)
       (assoc :children [(assoc text :text txt)])))
 
 (defn description-cell [todo]
@@ -223,20 +223,20 @@
                 (empty? todo) fragments
                 (string? elem)
                 (recur (rest todo)
-                       (cons (assoc text :text elem)
+                       (cons (assoc text :text (str elem " "))
                              fragments))
                 (contains? elem :project)
                 (recur (rest todo)
                        (cons (span-text (:project elem) "todo-project")
-                             (rest todo)))
+                             fragments))
                 (contains? elem :context)
                 (recur (rest todo)
                        (cons (span-text (:context elem) "todo-context")
-                             (rest todo)))
+                             fragments))
                 ; This exhausts valid options. If not, an error seems fair.
                 )))]
     (assoc cell :children
-           (descr-inner (:description todo) []))))
+           (reverse (descr-inner (:description todo) [])))))
 
 (def column-formatters
   {"complete" completion-cell

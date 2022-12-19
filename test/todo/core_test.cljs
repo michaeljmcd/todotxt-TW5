@@ -123,9 +123,23 @@
     (is (= {"Age" "3rd"}
            (first (result r))))))
 
-; experimental
-
 (deftest description-token-scratch
   (let [inp (make-input "measure space for +chapelShelving @chapel due:2016-05-30")
         r (apply-parser c/description inp)]
     (success? r)))
+
+; Wiki rendering tests
+
+(deftest description-generation
+  (let [todo {:description ["something about" {:project "myproject"}]}
+        r (c/description-cell todo)]
+    (is (= {:type "element"
+            :tag "td"
+            :children [
+              {:type "text" :text "something about "}
+              {:type "element"
+               :tag "span"
+               :attributes {"class" "todo-project"}
+               :children [{:type "text" :text "myproject"}]}
+            ]}
+           r))))
