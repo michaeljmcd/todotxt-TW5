@@ -32,10 +32,10 @@
 
 (deftest simple-line-test
   (let [inp (make-input "(A) test")
-          res (apply-parser c/todo-line inp)]
-      (is (success? res))
-      (is (= '({:priority "A" :description ["test"]})
-             (result res)))))
+        res (apply-parser c/todo-line inp)]
+    (is (success? res))
+    (is (= '({:priority "A" :description ["test"]})
+           (result res)))))
 
 (deftest tagged-line
   (let [inp (make-input "(D) test +todo in the @cli")
@@ -100,7 +100,7 @@
         r (apply-parser c/a-date inp)]
     (is (success? r))
     (is (tc/= (tc/date-time 1982 3 12)
-           (first (result r))))))
+              (first (result r))))))
 
 (deftest project-tag-test
   (let [inp (make-input "+Foobar")
@@ -128,5 +128,4 @@
 (deftest description-token-scratch
   (let [inp (make-input "measure space for +chapelShelving @chapel due:2016-05-30")
         r (apply-parser c/description inp)]
-    (success? r)
-    ))
+    (success? r)))
