@@ -3,7 +3,7 @@
 TARGETDIR="../todotxt"
 
 if [ ! -e ${TARGETDIR} ]; then
-    mkdir ${TARGETDIR}
+    mkdir -p ${TARGETDIR}
 fi
 
 rm -rf ${TARGETDIR}/files

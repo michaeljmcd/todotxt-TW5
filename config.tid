@@ -1,0 +1,13 @@
+title: $:/plugins/michaeljmcd/todotxt/config
+name: TODO.txt Config
+type: application/json
+description: A configuration for the TODO.txt renderer.
+
+{
+    "columns": ["complete",
+                "priority",
+                "Due",
+                "creation-date",
+                "completion-date",
+                "description"]
+}

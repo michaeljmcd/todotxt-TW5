@@ -8,8 +8,10 @@ Load the library
 \*/
 
 (function() {
+  var opts = JSON.parse($tw.wiki.getTiddlerText("$:/plugins/michaeljmcd/todotxt/config"));
+
   var TodoParser = function(type, text, options) {
-    this.tree = todo.core.todo_to_wiki(text);
+    this.tree = todo.core.todo_to_wiki(text, opts);
   };
 
   exports["text/x-todo"] = TodoParser;

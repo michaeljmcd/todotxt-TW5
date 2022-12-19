@@ -1,7 +1,6 @@
 {
-	"description": "Empty edition",
+	"description": "TODO.txt edition",
 	"plugins": [
-		"michaeljmcd/test1",
 		"michaeljmcd/todotxt"
 	],
 	"themes": [

@@ -247,47 +247,72 @@
       (descr-inner (:description todo) []))
     ))
 
-(defn convert-todo [todo]
+(def column-formatters
+  {"complete" completion-cell
+   "priority" priority-cell
+   "creation-date" creation-date-cell
+   "completion-date" completion-date-cell
+   "description" description-cell})
+
+(defn custom-column-cell [col todo]
+  (assoc cell :children [(assoc text :text (get (get todo :fields) col))]))
+
+(defn convert-todo [config todo]
    (assoc row
           :children
-          [
-           (completion-cell todo)
-           (priority-cell todo)
-           (creation-date-cell todo)
-           (completion-date-cell todo)
-           (description-cell todo)
-           ]))
+          (map (fn [col]
+                 (if (contains? column-formatters col)
+                   (apply (get column-formatters col) [todo])
+                   (custom-column-cell col todo)
+                 ))
+               (get config "columns"))
+          ))
+
+(def default-column-names 
+  {"complete" "Complete?"
+   "priority" "Priority"
+   "creation-date" "Created"
+   "completion-date" "Completed"
+   "description" "Description"})
+
+(defn build-header [config todos]
+  (letfn [(add-cell [col]
+            (assoc cell
+                   :children
+                   [
+                    {:type "text" :text (get default-column-names col col)
+                     }
+                    ]
+                   ))]
+    [
+      {:type "element" :tag "thead"
+                     :children [
+                        {:type "element" :tag "tr"
+                         :children (map add-cell (get config "columns"))
+                         }]}
+     ]
+    ))
 
 (def header 
   {:type "element"
          :tag "table"
-         :children [
-                    {:type "element" :tag "thead"
-                     :children [
-                        {:type "element" :tag "tr"
-                         :children [
-                              {:type "element" :tag "td" :children [{:type "text" :text "Complete?"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Priority"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Created"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Completed"}]}
-                              {:type "element" :tag "td" :children [{:type "text" :text "Description"}]}
-                              ]}]}
-                    ]})
+         :children []})
 
-(defn convert-parse-tree [todos]
+(defn convert-parse-tree [config todos]
   (if (empty? todos)
     [{:type "text" :text "Nothing to do!"}]
     [(assoc header
            :children
-           (concat (:children header)
-                    (map convert-todo todos)))]))
+           (concat  (build-header config todos) 
+                    (map (partial convert-todo config) todos)
+                    ))]))
 
 (defn ^:export parse-todos [text]
   (clj->js (apply-parser todos text)))
 
-(defn ^:export todo-to-wiki [text]
+(defn ^:export todo-to-wiki [text config]
     (->> text
          (apply-parser todos)
          result
-         convert-parse-tree
+         (convert-parse-tree (js->clj config))
          clj->js))
