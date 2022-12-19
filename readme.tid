@@ -11,7 +11,8 @@ All configuration for this plugin is stored in
 [[$:/plugins/michaeljmcd/todotxt/config]]. At the moment, this consists of a
 list of columns to be displayed in the order in which they will be displayed.
 All columns mandated by the spec above are included. Any custom field names will
-be shown as indicated.
+be shown as indicated. Configuration only loads once, so a wiki refresh will be
+needed after making changes.
 
 To use CodeMirror to edit todo.txt tiddlers, create a tiddler with a title of
 `$:/config/EditorTypeMappings/text/x-todo` with the contents of `codemirror`.
