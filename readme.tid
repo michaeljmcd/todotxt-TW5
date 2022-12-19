@@ -7,5 +7,11 @@ edited in plain text (as the name suggests), but rendered in a visual fashion.
 See [[$:/plugins/michaeljmcd/todotxt/example]] for an example list. Do note that
 the type is `text/x-todo` rather than a pre-existing type.
 
+All configuration for this plugin is stored in
+[[$:/plugins/michaeljmcd/todotxt/config]]. At the moment, this consists of a
+list of columns to be displayed in the order in which they will be displayed.
+All columns mandated by the spec above are included. Any custom field names will
+be shown as indicated.
+
 To use CodeMirror to edit todo.txt tiddlers, create a tiddler with a title of
 `$:/config/EditorTypeMappings/text/x-todo` with the contents of `codemirror`.
