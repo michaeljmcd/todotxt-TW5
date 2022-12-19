@@ -1,0 +1,11 @@
+title: $:/plugins/michaeljmcd/todotxt/readme
+
+This is a TiddlyWiki plugin for parsing and displaying task lists in the
+[[TODO.txt|https://github.com/todotxt/todo.txt]] format. Lists are created and
+edited in plain text (as the name suggests), but rendered in a visual fashion.
+
+See [[$:/plugins/michaeljmcd/todotxt/example]] for an example list. Do note that
+the type is `text/x-todo` rather than a pre-existing type.
+
+To use CodeMirror to edit todo.txt tiddlers, create a tiddler with a title of
+`$:/config/EditorTypeMappings/text/x-todo` with the contents of `codemirror`.
