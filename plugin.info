@@ -1,0 +1,12 @@
+{
+	"title": "$:/plugins/michaeljmcd/todotxt",
+	"description": "TODO.txt utilities.",
+	"name":"TODO.txt",
+	"author": "Michael McDermott",
+	"version": "0.2.2",
+	"core-version": ">=5.1.22",
+	"source": "https://github.com/michaeljmcd/todotxt-TW5",
+	"list": "readme example license",
+	"dependents": "",
+	"plugin-type": "plugin"
+}

@@ -1,0 +1,12 @@
+{
+	"tiddlers": [
+		{
+			"file": "app.js",
+			"fields": {
+				"type": "application/javascript",
+				"title": "$:/plugins/michaeljmcd/todotxt/app.js",
+				"module-type": "library"
+			}
+		}
+	]
+}

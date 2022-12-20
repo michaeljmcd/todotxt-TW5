@@ -1,0 +1,11 @@
+;; shadow-cljs configuration
+{:deps true
+ :builds {:app  {:target :browser
+                  :output-to "todo.js"
+                  :modules {:app {:entries [todo.core]}}
+                  :exports {todo todo.core}
+                  :compiler-options {:output-wrapper true}}
+          :test {:target :node-test
+                 :output-to "out/node-tests.js"
+                 :ns-regexp "-test$"
+                 :autorun true}}}
