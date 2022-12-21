@@ -139,7 +139,7 @@
               {:type "text" :text "something about "}
               {:type "element"
                :tag "span"
-               :attributes {"class" "todo-project"}
+               :attributes {"class" {:type "string" :value "todo-project"}
                :children [{:type "text" :text "myproject "}]}
               {:type "text" :text "you see "}
             ]}

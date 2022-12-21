@@ -213,7 +213,7 @@
 
 (defn span-text [txt cls]
   (-> span
-      (assoc-in [:attributes "class"] cls)
+      (assoc :attributes {"class" {:type "string" :value cls}})
       (assoc :children [(assoc text :text (str txt " "))])))
 
 (defn description-cell [todo]
@@ -238,12 +238,47 @@
     (assoc cell :children
            (reverse (descr-inner (:description todo) [])))))
 
+(defn project-tag? [x]
+  (and (map? x)
+       (contains? x :project)))
+
+(defn context-tag? [x]
+  (and (map? x)
+       (contains? x :context)))
+
+(defn context-cell [todo]
+  (letfn [(project-cell-inner [prj]
+            (span-text (:context prj) "todo-project")
+            )]
+  (assoc cell :children
+         (map project-cell-inner (filter context-tag? (:description todo)))
+         )))
+
+(defn project-cell [todo]
+  (letfn [(project-cell-inner [prj]
+            (span-text (:project prj) "todo-project")
+            )]
+  (assoc cell :children
+         (map project-cell-inner (filter project-tag? (:description todo)))
+         )))
+
+(def default-column-names
+  {"complete" "Complete?"
+   "priority" "Priority"
+   "creation-date" "Created"
+   "completion-date" "Completed"
+   "project" "Project"
+   "context" "Context"
+   "description" "Description"})
+
 (def column-formatters
   {"complete" completion-cell
    "priority" priority-cell
    "creation-date" creation-date-cell
    "completion-date" completion-date-cell
-   "description" description-cell})
+   "description" description-cell
+   "project" project-cell
+   "context" context-cell})
 
 (defn custom-column-cell [col todo]
   (assoc cell :children [(assoc text :text (get (get todo :fields) col))]))
@@ -256,13 +291,6 @@
                   (apply (get column-formatters col) [todo])
                   (custom-column-cell col todo)))
               (get config "columns"))))
-
-(def default-column-names
-  {"complete" "Complete?"
-   "priority" "Priority"
-   "creation-date" "Created"
-   "completion-date" "Completed"
-   "description" "Description"})
 
 (defn build-header [config todos]
   (letfn [(add-cell [col]

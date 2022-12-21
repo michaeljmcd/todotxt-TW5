@@ -1,0 +1,6 @@
+title: $:/plugins/michaeljmcd/todotxt/style
+type: text/css
+
+.todo-project {
+    font-weight: bold;
+}

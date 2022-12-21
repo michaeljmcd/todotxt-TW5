@@ -9,5 +9,9 @@ description: A configuration for the TODO.txt renderer.
                 "Due",
                 "creation-date",
                 "completion-date",
-                "description"]
+                "project",
+                "context",
+                "description"],
+    "showProjectsInDescription": true,
+    "showContextInDescription": true
 }
