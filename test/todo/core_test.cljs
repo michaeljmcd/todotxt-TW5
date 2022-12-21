@@ -132,15 +132,27 @@
 
 (deftest description-generation
   (let [todo {:description ["something about" {:project "myproject"} "you see"]}
-        r (c/description-cell todo)]
+        config {"showProjectsInDescription" true "showContextsInDescription" true}
+        r (c/description-cell config todo)]
     (is (= {:type "element"
             :tag "td"
             :children [
               {:type "text" :text "something about "}
               {:type "element"
                :tag "span"
-               :attributes {"class" {:type "string" :value "todo-project"}
+               :attributes {"class" {:type "string" :value "todo-project"}}
                :children [{:type "text" :text "myproject "}]}
               {:type "text" :text "you see "}
             ]}
            r))))
+
+(deftest hide-description-tags
+  (let [todo {:description ["something something" {:project "asdf"} " " {:context "def"}]}
+        config {"showProjectsInDescription" false "showContextsInDescription" false}
+        r (c/description-cell config todo)]
+   (is (= {:type "element"
+            :tag "td"
+            :children [
+              {:type "text" :text "something something "}
+              {:type "text" :text "  "}
+            ]}))))

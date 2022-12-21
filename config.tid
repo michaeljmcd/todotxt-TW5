@@ -13,5 +13,5 @@ description: A configuration for the TODO.txt renderer.
                 "context",
                 "description"],
     "showProjectsInDescription": true,
-    "showContextInDescription": true
+    "showContextsInDescription": true
 }

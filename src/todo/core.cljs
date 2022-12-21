@@ -192,21 +192,26 @@
    :attributes {}
    :children []})
 
-(defn completion-cell [todo]
+(def table
+  {:type "element"
+   :tag "table"
+   :children []})
+
+(defn completion-cell [_ todo]
   (if (and (contains? todo :complete)
            (:complete todo))
     (assoc cell :children [{:type "raw" :html "&#x2611;"}])
     (assoc cell :children [{:type "raw" :html "&#x2610;"}])))
 
-(defn priority-cell [todo]
+(defn priority-cell [_ todo]
   (assoc cell :children [{:type "text" :text (:priority todo)}]))
 
-(defn completion-date-cell [todo]
+(defn completion-date-cell [_ todo]
   (if (contains? todo :completion-date)
     (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:completion-date todo))}])
     (assoc cell :children [{:type "text" :text ""}])))
 
-(defn creation-date-cell [todo]
+(defn creation-date-cell [_ todo]
   (if (contains? todo :creation-date)
     (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:creation-date todo))}])
     (assoc cell :children [{:type "text" :text ""}])))
@@ -216,28 +221,6 @@
       (assoc :attributes {"class" {:type "string" :value cls}})
       (assoc :children [(assoc text :text (str txt " "))])))
 
-(defn description-cell [todo]
-  (letfn [(descr-inner [todo fragments]
-            (let [elem (first todo)]
-              (cond
-                (empty? todo) fragments
-                (string? elem)
-                (recur (rest todo)
-                       (cons (assoc text :text (str elem " "))
-                             fragments))
-                (contains? elem :project)
-                (recur (rest todo)
-                       (cons (span-text (:project elem) "todo-project")
-                             fragments))
-                (contains? elem :context)
-                (recur (rest todo)
-                       (cons (span-text (:context elem) "todo-context")
-                             fragments))
-                ; This exhausts valid options. If not, an error seems fair.
-                )))]
-    (assoc cell :children
-           (reverse (descr-inner (:description todo) [])))))
-
 (defn project-tag? [x]
   (and (map? x)
        (contains? x :project)))
@@ -246,7 +229,43 @@
   (and (map? x)
        (contains? x :context)))
 
-(defn context-cell [todo]
+(defn description-cell [config todo]
+  (letfn [(descr-inner [fragments todo]
+            (let [elem (first todo)]
+              (cond
+                (empty? todo) fragments
+                (string? elem)
+                (recur (cons (assoc text :text (str elem " "))
+                             fragments)
+                       (rest todo))
+                (contains? elem :project)
+                (recur (cons (span-text (:project elem) "todo-project")
+                             fragments)
+                       (rest todo))
+                (contains? elem :context)
+                (recur (cons (span-text (:context elem) "todo-context")
+                             fragments)
+                       (rest todo))
+                ; This exhausts valid options. If not, an error seems fair.
+                )))
+           (prefilter-descr [config el]
+             (cond
+               (and (project-tag? el)
+                    (not (get config "showProjectsInDescription"))) false
+               (and (context-tag? el)
+                    (not (get config "showContextsInDescription"))) false
+               :else true)
+             )]
+    (assoc cell
+           :children
+           (->> todo
+                :description
+                (filter (partial prefilter-descr config))
+                (descr-inner [])
+                reverse))
+          ))
+
+(defn context-cell [_ todo]
   (letfn [(project-cell-inner [prj]
             (span-text (:context prj) "todo-project")
             )]
@@ -254,7 +273,7 @@
          (map project-cell-inner (filter context-tag? (:description todo)))
          )))
 
-(defn project-cell [todo]
+(defn project-cell [_ todo]
   (letfn [(project-cell-inner [prj]
             (span-text (:project prj) "todo-project")
             )]
@@ -288,7 +307,7 @@
          :children
          (map (fn [col]
                 (if (contains? column-formatters col)
-                  (apply (get column-formatters col) [todo])
+                  (apply (get column-formatters col) [config todo])
                   (custom-column-cell col todo)))
               (get config "columns"))))
 
@@ -302,15 +321,10 @@
       :children [{:type "element" :tag "tr"
                   :children (map add-cell (get config "columns"))}]}]))
 
-(def header
-  {:type "element"
-   :tag "table"
-   :children []})
-
 (defn convert-parse-tree [config todos]
   (if (empty? todos)
     [{:type "text" :text "Nothing to do!"}]
-    [(assoc header
+    [(assoc table
             :children
             (concat  (build-header config todos)
                      (map (partial convert-todo config) todos)))]))
