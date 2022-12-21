@@ -248,38 +248,32 @@
                        (rest todo))
                 ; This exhausts valid options. If not, an error seems fair.
                 )))
-           (prefilter-descr [config el]
-             (cond
-               (and (project-tag? el)
-                    (not (get config "showProjectsInDescription"))) false
-               (and (context-tag? el)
-                    (not (get config "showContextsInDescription"))) false
-               :else true)
-             )]
+          (prefilter-descr [config el]
+            (cond
+              (and (project-tag? el)
+                   (not (get config "showProjectsInDescription"))) false
+              (and (context-tag? el)
+                   (not (get config "showContextsInDescription"))) false
+              :else true))]
     (assoc cell
            :children
            (->> todo
                 :description
                 (filter (partial prefilter-descr config))
                 (descr-inner [])
-                reverse))
-          ))
+                reverse))))
 
 (defn context-cell [_ todo]
   (letfn [(project-cell-inner [prj]
-            (span-text (:context prj) "todo-project")
-            )]
-  (assoc cell :children
-         (map project-cell-inner (filter context-tag? (:description todo)))
-         )))
+            (span-text (:context prj) "todo-project"))]
+    (assoc cell :children
+           (map project-cell-inner (filter context-tag? (:description todo))))))
 
 (defn project-cell [_ todo]
   (letfn [(project-cell-inner [prj]
-            (span-text (:project prj) "todo-project")
-            )]
-  (assoc cell :children
-         (map project-cell-inner (filter project-tag? (:description todo)))
-         )))
+            (span-text (:project prj) "todo-project"))]
+    (assoc cell :children
+           (map project-cell-inner (filter project-tag? (:description todo))))))
 
 (def default-column-names
   {"complete" "Complete?"
