@@ -12,6 +12,15 @@ description: A configuration for the TODO.txt renderer.
                 "project",
                 "context",
                 "description"],
+    "columnLabels": {
+       "complete": "Complete?",
+       "priority": "Priority",
+       "creation-date": "Created",
+       "completion-date": "Completed",
+       "project": "Project",
+       "context": "Context",
+       "description": "Description"
+    },
     "showProjectsInDescription": true,
     "showContextsInDescription": true
 }

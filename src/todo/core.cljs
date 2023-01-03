@@ -275,15 +275,6 @@
     (assoc cell :children
            (map project-cell-inner (filter project-tag? (:description todo))))))
 
-(def default-column-names
-  {"complete" "Complete?"
-   "priority" "Priority"
-   "creation-date" "Created"
-   "completion-date" "Completed"
-   "project" "Project"
-   "context" "Context"
-   "description" "Description"})
-
 (def column-formatters
   {"complete" completion-cell
    "priority" priority-cell
@@ -309,7 +300,7 @@
   (letfn [(add-cell [col]
             (assoc cell
                    :children
-                   [{:type "text" :text (get default-column-names col col)}]))]
+                   [{:type "text" :text (get (get config "columnLabels") col col)}]))]
 
     [{:type "element" :tag "thead"
       :children [{:type "element" :tag "tr"
