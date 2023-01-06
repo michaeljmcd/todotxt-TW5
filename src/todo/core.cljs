@@ -197,11 +197,32 @@
    :tag "table"
    :children []})
 
+;(def checkbox
+;  {:type "element"
+;   :tag "input"
+;   :attributes {"type" {:type "string" :value "checkbox"}}
+;                "onclick" {:type "string" :value "alert('hello');"}})
+
+;(def checkbox
+;  {:type "checkbox"
+;   :attributes {"checkactions" {:type "string" :value "<$action-sendmessage $message=\"tm-modal\" $param=\"GettingStarted\"/>"}
+;                "uncheckactions" {:type "string" :value "<$action-sendmessage $message=\"tm-modal\" $param=\"GettingStarted\"/>"}
+;                }
+;   })
+
+(def checkbox
+  {:type "tickbox"
+   :attributes {"checked" {:type "string" :value "false"}}})
+
 (defn completion-cell [_ todo]
   (if (and (contains? todo :complete)
            (:complete todo))
-    (assoc cell :children [{:type "raw" :html "&#x2611;"}])
-    (assoc cell :children [{:type "raw" :html "&#x2610;"}])))
+    ;(assoc cell :children [(assoc-in checkbox [:attributes "checked"] {:type "string" :value ""})])
+    (assoc cell :children [(assoc-in checkbox [:attributes "checked" "value"] "true")])
+    (assoc cell :children [checkbox])
+   ; (assoc cell :children [{:type "raw" :html "&#x2611;"}])
+   ; (assoc cell :children [{:type "raw" :html "&#x2610;"}])
+    ))
 
 (defn priority-cell [_ todo]
   (assoc cell :children [{:type "text" :text (:priority todo)}]))
