@@ -57,7 +57,10 @@ TickboxWidget.prototype.handleChangeEvent = function(e) {
 			delete todos[index]["completion-date"];
 		} else {
 			todos[index].complete = true;
-			todos[index]["completion-date"] = todo.core.current_date();
+
+			if ('creation-date' in todos[index]) {
+				todos[index]["completion-date"] = todo.core.current_date();
+			}
 		}
 
 		$tw.wiki.setText(this.todoTiddler, "text", null, todo.core.todo_to_text(todos));

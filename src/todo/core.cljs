@@ -385,6 +385,10 @@
               nil
               "x"))
 
+          (format-field [f]
+            (println f)
+            (str (name (first f)) ":" (second f)))
+
           (fmt-todo [t]
             (let [base 
                   [(coalesce-complete (:complete t))
@@ -392,9 +396,9 @@
                    (coalesce-date (:completion-date t))
                    (coalesce-date (:creation-date t))
                    (apply str (interpose " " (reverse (str-desc (:description t) []))))
-                   ; TODO custom fields
-                   ]]
-              (apply str (interpose " " (filter (comp not nil?) base)))
+                   ]
+                  fields (interpose " " (map format-field (:fields t)))]
+              (apply str (interpose " " (filter (comp not nil?) (concat base fields))))
             ))
           ]
     (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))
