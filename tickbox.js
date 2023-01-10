@@ -47,7 +47,18 @@ TickboxWidget.prototype.handleChangeEvent = function(e) {
 	var tiddler = this.wiki.getTiddler(this.todoTiddler);
 
 	if (tiddler) { 
-		$tw.wiki.setText(this.todoTiddler, "text", null, "hello world!");
+		var parseResult = todo.core.parse_todos(tiddler.fields.text);
+		//TODO: validate
+		var todos = parseResult.result; 
+		var index = parseInt(this.lineNumber);
+
+		if (todos[index].complete === true) {
+			todos[index].complete = false;
+		} else {
+			todos[index].complete = true;
+		}
+
+		$tw.wiki.setText(this.todoTiddler, "text", null, todo.core.todo_to_text(todos));
 	}
 };
 

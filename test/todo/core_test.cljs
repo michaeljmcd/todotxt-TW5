@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [edessa.parser :refer [apply-parser make-input success? result]]
             [clojure.pprint :refer [pprint]]
+            [clojure.string :refer [trim]]
             [taoensso.timbre :as t :refer [debug error info merge-config!]]
             [cljs-time.extend :as te]
             [cljs-time.core :as tc]
@@ -169,3 +170,12 @@
 
                        ]}
            r))))
+
+; Formatting tests
+(deftest todo-to-text-tests
+  (let [inp (make-input (load-resource "test-resources/simple.txt"))
+        todos (:result (apply-parser c/todos inp))
+        str-todos (c/todo-to-text todos)]
+    (is (= (trim (load-resource "test-resources/simple.txt"))
+        str-todos))
+    ))

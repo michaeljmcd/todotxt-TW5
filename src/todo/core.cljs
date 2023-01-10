@@ -351,3 +351,50 @@
        result
        (convert-parse-tree (js->clj config))
        clj->js))
+
+; Formatting functions
+
+(defn ^:export todo-to-text
+  [todos]
+  (letfn [
+          (coalesce-date [d]
+            (if (nil? d)
+              nil
+              (tf/unparse (tf/formatters :date) d)))
+
+          (str-desc [desc res]
+            (cond
+              (empty? desc) res
+              (string? (first desc)) 
+                (recur (rest desc) (cons (first desc) res))
+              (project-tag? (first desc))
+                (recur (rest desc) (cons (str "+" (:project (first desc))) res))
+              (context-tag? (first desc))
+                (recur (rest desc) (cons (str "@" (:context (first desc))) res))))
+
+          (coalesce-pri [p]
+            (if (nil? p)
+              p
+              (str "(" p ")")))
+
+          (coalesce-complete [c]
+            (if (or (nil? c) (not c))
+              nil
+              "x"))
+
+          (fmt-todo [t]
+            (let [base 
+                  [(coalesce-complete (:complete t))
+                   (coalesce-pri (:priority t))
+                   (coalesce-date (:creation-date t))
+                   (coalesce-date (:completion-date t))
+                   (apply str (reverse (str-desc (:description t) [])))
+                   ; TODO custom fields
+                   ]]
+              (apply str (interpose " " (filter (comp not nil?) base)))
+            ))
+          ]
+    (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))
+    )
+  )
+
