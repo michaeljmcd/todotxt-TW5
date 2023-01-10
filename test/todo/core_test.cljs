@@ -163,12 +163,10 @@
         r (c/completion-cell config todo)]
     (is (= {:type "element"
             :tag "td"
-            :children [
-                       {:type "tickbox"
+            :children [{:type "tickbox"
                         :attributes {"checked" {:type "string" "value" "false"}
-                                     "line-number" {:type "string" "value" 7}}}
+                                     "line-number" {:type "string" "value" 7}}}]}
 
-                       ]}
            r))))
 
 ; Formatting tests
@@ -177,5 +175,4 @@
         todos (:result (apply-parser c/todos inp))
         str-todos (c/todo-to-text todos)]
     (is (= (trim (load-resource "test-resources/simple.txt"))
-        str-todos))
-    ))
+           str-todos))))

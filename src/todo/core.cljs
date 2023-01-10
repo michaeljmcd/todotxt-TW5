@@ -145,17 +145,17 @@
      (using (plus (not-one-of [\newline \tab \space])) stringify)
      non-breaking-ws))
    :contextually-using (fn [c x]
-            (let [res {:description (map (fn [y] (if (string? y)
-                                                   (trim y)
-                                                   y))
-                                         (str-accumulate (filter (comp not custom-field?) x)))
-                       :line-number (:line-number c)
+                         (let [res {:description (map (fn [y] (if (string? y)
+                                                                (trim y)
+                                                                y))
+                                                      (str-accumulate (filter (comp not custom-field?) x)))
+                                    :line-number (:line-number c)
                        ; TODO FIXME
-                       }
-                  fields (filter custom-field? x)]
-              (if (empty? fields)
-                res
-                (assoc res :fields (apply merge fields)))))))
+                                    }
+                               fields (filter custom-field? x)]
+                           (if (empty? fields)
+                             res
+                             (assoc res :fields (apply merge fields)))))))
 
 (def todo-line
   (parser
@@ -217,20 +217,17 @@
 (def checkbox
   {:type "tickbox"
    :attributes {"checked" {:type "string" "value" "false"}
-                "line-number" {:type "string" "value" ""}
-                }})
+                "line-number" {:type "string" "value" ""}}})
 
 (defn completion-cell [_ todo]
   (let [widget (-> checkbox
                    (assoc-in [:attributes "line-number" "value"] (:line-number todo)))]
 
-    (assoc cell :children [
-  (if (and (contains? todo :complete)
-           (:complete todo))
+    (assoc cell :children [(if (and (contains? todo :complete)
+                                    (:complete todo))
     ;(assoc cell :children [(assoc-in checkbox [:attributes "checked"] {:type "string" :value ""})])
-    (assoc-in widget [:attributes "checked" "value"] "true")
-    widget)])
-    ))
+                             (assoc-in widget [:attributes "checked" "value"] "true")
+                             widget)])))
 
 (defn priority-cell [_ todo]
   (assoc cell :children [{:type "text" :text (:priority todo)}]))
@@ -359,8 +356,7 @@
 
 (defn ^:export todo-to-text
   [todos]
-  (letfn [
-          (coalesce-date [d]
+  (letfn [(coalesce-date [d]
             (if (nil? d)
               nil
               (tf/unparse (tf/formatters :date) d)))
@@ -368,12 +364,12 @@
           (str-desc [desc res]
             (cond
               (empty? desc) res
-              (string? (first desc)) 
-                (recur (rest desc) (cons (first desc) res))
+              (string? (first desc))
+              (recur (rest desc) (cons (first desc) res))
               (project-tag? (first desc))
-                (recur (rest desc) (cons (str "+" (:project (first desc))) res))
+              (recur (rest desc) (cons (str "+" (:project (first desc))) res))
               (context-tag? (first desc))
-                (recur (rest desc) (cons (str "@" (:context (first desc))) res))))
+              (recur (rest desc) (cons (str "@" (:context (first desc))) res))))
 
           (coalesce-pri [p]
             (if (nil? p)
@@ -390,18 +386,14 @@
             (str (name (first f)) ":" (second f)))
 
           (fmt-todo [t]
-            (let [base 
+            (let [base
                   [(coalesce-complete (:complete t))
                    (coalesce-pri (:priority t))
                    (coalesce-date (:completion-date t))
                    (coalesce-date (:creation-date t))
-                   (apply str (interpose " " (reverse (str-desc (:description t) []))))
-                   ]
+                   (apply str (interpose " " (reverse (str-desc (:description t) []))))]
                   fields (interpose " " (map format-field (:fields t)))]
-              (apply str (interpose " " (filter (comp not nil?) (concat base fields))))
-            ))
-          ]
-    (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))
-    )
-  )
+              (apply str (interpose " " (filter (comp not nil?) (concat base fields))))))]
+
+    (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))))
 
