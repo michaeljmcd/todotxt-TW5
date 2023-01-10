@@ -35,11 +35,23 @@ TickboxWidget.prototype.render = function(parent,nextSibling) {
 		this.inputNode.setAttribute("checked", "");
 	}
 
+	$tw.utils.addEventListeners(this.inputNode,[
+		{name: "change", handlerObject: this, handlerMethod: "handleChangeEvent"}
+	]);
+
 	parent.insertBefore(this.inputNode,nextSibling);
+};
+
+TickboxWidget.prototype.handleChangeEvent = function(e) {
+	this.todoTiddler = this.getAttribute("todo-tiddler");
+	this.lineNumber = this.getAttribute("line-number");
+	alert("Status change requested for " + this.todoTiddler + ":" + this.lineNumber);
 };
 
 TickboxWidget.prototype.execute = function() {
 	this.isChecked = this.getAttribute("checked");
+	this.todoTiddler = this.getAttribute("todo-tiddler");
+	this.lineNumber = this.getAttribute("line-number");
 
 	// Make the child widgets
 	this.makeChildWidgets();

@@ -144,10 +144,13 @@
      (using (plus (not-one-of [\newline \tab \space])) stringify)
      non-breaking-ws))
    :using (fn [x]
-            (let [res {:description (map (fn [x] (if (string? x)
-                                                   (trim x)
-                                                   x))
-                                         (str-accumulate (filter (comp not custom-field?) x)))}
+            (let [res {:description (map (fn [y] (if (string? y)
+                                                   (trim y)
+                                                   y))
+                                         (str-accumulate (filter (comp not custom-field?) x)))
+                       :line-number 0 ;(:line-number c)
+                       ; TODO FIXME
+                       }
                   fields (filter custom-field? x)]
               (if (empty? fields)
                 res
@@ -212,16 +215,22 @@
 
 (def checkbox
   {:type "tickbox"
-   :attributes {"checked" {:type "string" :value "false"}}})
+   :attributes {"checked" {:type "string" "value" "false"}
+                "todo-tiddler" {:type "string" "value" ""}
+                "line-number" {:type "string" "value" ""}
+                }})
 
 (defn completion-cell [_ todo]
+  (let [widget (-> checkbox
+                   (assoc-in [:attributes "todo-tiddler" "value"] "My TODO")
+                   (assoc-in [:attributes "line-number" "value"] (:line-number todo)))]
+
+    (assoc cell :children [
   (if (and (contains? todo :complete)
            (:complete todo))
     ;(assoc cell :children [(assoc-in checkbox [:attributes "checked"] {:type "string" :value ""})])
-    (assoc cell :children [(assoc-in checkbox [:attributes "checked" "value"] "true")])
-    (assoc cell :children [checkbox])
-   ; (assoc cell :children [{:type "raw" :html "&#x2611;"}])
-   ; (assoc cell :children [{:type "raw" :html "&#x2610;"}])
+    (assoc-in widget [:attributes "checked" "value"] "true")
+    widget)])
     ))
 
 (defn priority-cell [_ todo]
