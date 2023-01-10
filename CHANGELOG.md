@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All columns (including built-ins) have column headers specified in
   configuration tiddler.
 - Checkbox columns are now centered.
+- General refactoring and cleanup.
 
 ## [0.2.2]
 
