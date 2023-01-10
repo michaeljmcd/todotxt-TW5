@@ -43,7 +43,12 @@ TickboxWidget.prototype.render = function(parent,nextSibling) {
 };
 
 TickboxWidget.prototype.handleChangeEvent = function(e) {
-	alert("Status change requested for " + this.todoTiddler + ":" + this.lineNumber);
+	//alert("Status change requested for " + this.todoTiddler + ":" + this.lineNumber);
+	var tiddler = this.wiki.getTiddler(this.todoTiddler);
+
+	if (tiddler) { 
+		$tw.wiki.setText(this.todoTiddler, "text", null, "hello world!");
+	}
 };
 
 TickboxWidget.prototype.execute = function() {
