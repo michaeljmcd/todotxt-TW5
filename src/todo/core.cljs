@@ -2,7 +2,8 @@
   (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times using result]]
             [taoensso.timbre :as t :refer [debug error info merge-config!]]
             [clojure.string :refer [trim]]
-            [cljs-time.format :as tf]))
+            [cljs-time.format :as tf]
+            [cljs-time.core :as tc]))
 
 ; The main goal here is to write a plugin that can parser [TODO.txt](https://github.com/todotxt/todo.txt)
 ; and render it as HTML within TiddlyWiki 5. This module will have all of the
@@ -354,6 +355,8 @@
 
 ; Formatting functions
 
+(defn ^:export current-date [] (tc/now))
+
 (defn ^:export todo-to-text
   [todos]
   (letfn [
@@ -388,7 +391,7 @@
                    (coalesce-pri (:priority t))
                    (coalesce-date (:creation-date t))
                    (coalesce-date (:completion-date t))
-                   (apply str (reverse (str-desc (:description t) [])))
+                   (apply str (interpose " " (reverse (str-desc (:description t) []))))
                    ; TODO custom fields
                    ]]
               (apply str (interpose " " (filter (comp not nil?) base)))

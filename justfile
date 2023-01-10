@@ -9,10 +9,7 @@ watch-test:
 compile-clj:
     npx shadow-cljs release app
 
-bundle:
-    just compile-clj
-    just export
-    just edition
+bundle: compile-clj export edition
 
 export:
   #!/usr/bin/env sh
