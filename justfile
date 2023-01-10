@@ -22,10 +22,10 @@ export:
 
   rm -rf ${TARGETDIR}/*
 
-  cp *.tid *.info *.js ${TARGETDIR}
+  cp tiddlers/*.tid tiddlers/*.info tiddlers/*.js ${TARGETDIR}
   mkdir ${TARGETDIR}/files
   cp -r public/js/*.js ${TARGETDIR}/files
-  cp public.files ${TARGETDIR}/files/tiddlywiki.files
+  cp tiddlers/public.files ${TARGETDIR}/files/tiddlywiki.files
 
 edition:
   #!/bin/sh
