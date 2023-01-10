@@ -201,21 +201,8 @@
    :tag "table"
    :children []})
 
-;(def checkbox
-;  {:type "element"
-;   :tag "input"
-;   :attributes {"type" {:type "string" :value "checkbox"}}
-;                "onclick" {:type "string" :value "alert('hello');"}})
-
-;(def checkbox
-;  {:type "checkbox"
-;   :attributes {"checkactions" {:type "string" :value "<$action-sendmessage $message=\"tm-modal\" $param=\"GettingStarted\"/>"}
-;                "uncheckactions" {:type "string" :value "<$action-sendmessage $message=\"tm-modal\" $param=\"GettingStarted\"/>"}
-;                }
-;   })
-
 (def checkbox
-  {:type "tickbox"
+  {:type "todo-tickbox"
    :attributes {"checked" {:type "string" "value" "false"}
                 "line-number" {:type "string" "value" ""}}})
 
@@ -225,7 +212,6 @@
 
     (assoc cell :children [(if (and (contains? todo :complete)
                                     (:complete todo))
-    ;(assoc cell :children [(assoc-in checkbox [:attributes "checked"] {:type "string" :value ""})])
                              (assoc-in widget [:attributes "checked" "value"] "true")
                              widget)])))
 
@@ -382,7 +368,6 @@
               "x"))
 
           (format-field [f]
-            (println f)
             (str (name (first f)) ":" (second f)))
 
           (fmt-todo [t]

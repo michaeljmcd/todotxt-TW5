@@ -77,6 +77,6 @@ TickboxWidget.prototype.execute = function() {
 };
 
 
-exports.tickbox = TickboxWidget;
+exports['todo-tickbox'] = TickboxWidget;
 
 })();
