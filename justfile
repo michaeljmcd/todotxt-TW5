@@ -32,8 +32,7 @@ export:
   cp -r public/js/*.js ${TARGETDIR}/files
   cp tiddlers/public.files ${TARGETDIR}/files/tiddlywiki.files
 
-# Builds todo.txt edition after all files have been copied to the correct
-# location.
+# Builds todo.txt edition after all files have been copied to the correct location.
 edition:
   #!/bin/sh
 
