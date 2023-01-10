@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added 
 
 - Checkboxes update todo tiddler.
+- Can now add project and context as separate columns to the display list.
+
+### Changed
+
+- All columns (including built-ins) have column headers specified in
+  configuration tiddler.
 
 ## [0.2.2]
 
