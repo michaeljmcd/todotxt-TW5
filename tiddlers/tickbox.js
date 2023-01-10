@@ -30,6 +30,7 @@ TickboxWidget.prototype.render = function(parent,nextSibling) {
 
 	this.inputNode = this.document.createElement("input");
 	this.inputNode.setAttribute("type", "checkbox");
+	this.inputNode.setAttribute("class", "todo-checkbox");
 
 	if (this.isChecked === "true") {
 		this.inputNode.setAttribute("checked", "");

@@ -163,7 +163,8 @@
         r (c/completion-cell config todo)]
     (is (= {:type "element"
             :tag "td"
-            :children [{:type "tickbox"
+            :attributes {"class" {:type "string" :value "todo-complete-cell"}}
+            :children [{:type "todo-tickbox"
                         :attributes {"checked" {:type "string" "value" "false"}
                                      "line-number" {:type "string" "value" 7}}}]}
 

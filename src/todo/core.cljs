@@ -213,7 +213,10 @@
     (assoc cell :children [(if (and (contains? todo :complete)
                                     (:complete todo))
                              (assoc-in widget [:attributes "checked" "value"] "true")
-                             widget)])))
+                             widget)]
+           :attributes {"class" {:type "string" :value "todo-complete-cell"}}
+
+           )))
 
 (defn priority-cell [_ todo]
   (assoc cell :children [{:type "text" :text (:priority todo)}]))
