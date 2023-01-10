@@ -389,8 +389,8 @@
             (let [base 
                   [(coalesce-complete (:complete t))
                    (coalesce-pri (:priority t))
-                   (coalesce-date (:creation-date t))
                    (coalesce-date (:completion-date t))
+                   (coalesce-date (:creation-date t))
                    (apply str (interpose " " (reverse (str-desc (:description t) []))))
                    ; TODO custom fields
                    ]]
