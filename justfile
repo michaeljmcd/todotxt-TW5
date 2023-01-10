@@ -35,3 +35,8 @@ edition:
   pushd ../../..
   node ./tiddlywiki.js editions/${EDITION} --build index
   popd
+
+clean:
+  #!/bin/sh
+
+  rm -rf out target public
