@@ -4,7 +4,7 @@
         com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
         github-michaeljmcd/edessa {:git/url "https://github.com/michaeljmcd/edessa"
                                    ; :sha "955bf6f37f2e4c673b5a1b42778a42edfd7848d2"
-                                   :sha "5610465d68dfbfc82b412abe1a142d871a52d17e "
+                                   :sha "5610465d68dfbfc82b412abe1a142d871a52d17e"
                                    }
         }
  :aliases {

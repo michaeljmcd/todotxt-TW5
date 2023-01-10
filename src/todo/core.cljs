@@ -143,12 +143,12 @@
      custom-field
      (using (plus (not-one-of [\newline \tab \space])) stringify)
      non-breaking-ws))
-   :using (fn [x]
+   :contextually-using (fn [c x]
             (let [res {:description (map (fn [y] (if (string? y)
                                                    (trim y)
                                                    y))
                                          (str-accumulate (filter (comp not custom-field?) x)))
-                       :line-number 0 ;(:line-number c)
+                       :line-number (:line-number c)
                        ; TODO FIXME
                        }
                   fields (filter custom-field? x)]
@@ -216,13 +216,11 @@
 (def checkbox
   {:type "tickbox"
    :attributes {"checked" {:type "string" "value" "false"}
-                "todo-tiddler" {:type "string" "value" ""}
                 "line-number" {:type "string" "value" ""}
                 }})
 
 (defn completion-cell [_ todo]
   (let [widget (-> checkbox
-                   (assoc-in [:attributes "todo-tiddler" "value"] "My TODO")
                    (assoc-in [:attributes "line-number" "value"] (:line-number todo)))]
 
     (assoc cell :children [

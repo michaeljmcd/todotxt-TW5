@@ -43,14 +43,12 @@ TickboxWidget.prototype.render = function(parent,nextSibling) {
 };
 
 TickboxWidget.prototype.handleChangeEvent = function(e) {
-	this.todoTiddler = this.getAttribute("todo-tiddler");
-	this.lineNumber = this.getAttribute("line-number");
 	alert("Status change requested for " + this.todoTiddler + ":" + this.lineNumber);
 };
 
 TickboxWidget.prototype.execute = function() {
 	this.isChecked = this.getAttribute("checked");
-	this.todoTiddler = this.getAttribute("todo-tiddler");
+	this.todoTiddler = this.getAttribute("todo-tiddler", this.getVariable("currentTiddler"));
 	this.lineNumber = this.getAttribute("line-number");
 
 	// Make the child widgets

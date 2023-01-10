@@ -19,7 +19,7 @@
         res (apply-parser c/todos inp)]
     (is (success? res))
     (is (= '({:priority "A" :description ["Fix your stuff dude."] :line-number 0}
-             {:priority "Z" :description ["Get ice cream."] :line-number 0})
+             {:priority "Z" :description ["Get ice cream."] :line-number 1})
            (result res)))))
 
 (deftest custom-field-file-test
@@ -27,7 +27,7 @@
         res (apply-parser c/todos inp)]
     (is (success? res))
     (is (= '({:priority "Z" :description ["Do something."] :fields {"due" "2022-01-01" "BADGE" "fOO"} :line-number 0}
-             {:priority "B" :description ["Do something else!"] :fields {"due" "2022-03-01"} :line-number 0})
+             {:priority "B" :description ["Do something else!"] :fields {"due" "2022-03-01"} :line-number 1})
            (result res)))))
 
 (deftest simple-line-test
@@ -165,7 +165,6 @@
             :children [
                        {:type "tickbox"
                         :attributes {"checked" {:type "string" "value" "false"}
-                                     "todo-tiddler" {:type "string" "value" "My TODO"}
                                      "line-number" {:type "string" "value" 7}}}
 
                        ]}
