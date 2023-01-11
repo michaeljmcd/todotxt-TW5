@@ -214,22 +214,27 @@
                                     (:complete todo))
                              (assoc-in widget [:attributes "checked" "value"] "true")
                              widget)]
-           :attributes {"class" {:type "string" :value "todo-complete-cell"}}
-
-           )))
+           :attributes {"class" {:type "string" :value "todo-complete-cell"}})))
 
 (defn priority-cell [_ todo]
-  (assoc cell :children [{:type "text" :text (:priority todo)}]))
+  (assoc cell
+         :children [{:type "text" :text (:priority todo)}]
+         :attributes {"class" {:type "string" :value "todo-priority-cell"}}))
 
 (defn completion-date-cell [_ todo]
-  (if (contains? todo :completion-date)
-    (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:completion-date todo))}])
-    (assoc cell :children [{:type "text" :text ""}])))
+  (assoc cell :children 
+    (if (contains? todo :completion-date)
+      [{:type "text" :text (tf/unparse (tf/formatters :date) (:completion-date todo))}]
+      [{:type "text" :text ""}])
+  :attributes {"class" {:type "string" :value "todo-completion-date-cell"}}))
 
 (defn creation-date-cell [_ todo]
-  (if (contains? todo :creation-date)
-    (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:creation-date todo))}])
-    (assoc cell :children [{:type "text" :text ""}])))
+  (assoc cell
+         :children 
+          (if (contains? todo :creation-date)
+            [{:type "text" :text (tf/unparse (tf/formatters :date) (:creation-date todo))}]
+            [{:type "text" :text ""}])
+         :attributes {"class" {:type "string" :value "todo-creation-date-cell"}}))
 
 (defn span-text [txt cls]
   (-> span
@@ -260,9 +265,7 @@
                 (contains? elem :context)
                 (recur (cons (span-text (:context elem) "todo-context")
                              fragments)
-                       (rest todo))
-                ; This exhausts valid options. If not, an error seems fair.
-                )))
+                       (rest todo)))))
           (prefilter-descr [config el]
             (cond
               (and (project-tag? el)
@@ -276,7 +279,9 @@
                 :description
                 (filter (partial prefilter-descr config))
                 (descr-inner [])
-                reverse))))
+                reverse)
+           :attributes
+           {"class" {:type "string" :value "todo-description-cell"}})))
 
 (defn context-cell [_ todo]
   (letfn [(project-cell-inner [prj]

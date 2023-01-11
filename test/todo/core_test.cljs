@@ -140,6 +140,7 @@
         r (c/description-cell config todo)]
     (is (= {:type "element"
             :tag "td"
+            :attributes {"class" {:type "string" :value "todo-description-cell"}}
             :children [{:type "text" :text "something about "}
                        {:type "element"
                         :tag "span"

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Checkboxes update todo tiddler.
 - Can now add project and context as separate columns to the display list.
+- CSS classes to all rendered elements, allowing for custom styling.
 
 ### Changed
 
