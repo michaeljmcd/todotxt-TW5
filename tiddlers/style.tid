@@ -1,0 +1,11 @@
+title: $:/plugins/michaeljmcd/todotxt/style
+type: text/css
+tags: [[$:/tags/Stylesheet]]
+
+span.todo-project {
+    font-weight: bold;
+}
+
+td.todo-complete-cell {
+   text-align: center;
+}

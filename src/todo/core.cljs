@@ -2,7 +2,8 @@
   (:require [edessa.parser :refer [apply-parser star parser one-of match then discard not-one-of optional choice plus times using result]]
             [taoensso.timbre :as t :refer [debug error info merge-config!]]
             [clojure.string :refer [trim]]
-            [cljs-time.format :as tf]))
+            [cljs-time.format :as tf]
+            [cljs-time.core :as tc]))
 
 ; The main goal here is to write a plugin that can parser [TODO.txt](https://github.com/todotxt/todo.txt)
 ; and render it as HTML within TiddlyWiki 5. This module will have all of the
@@ -143,15 +144,18 @@
      custom-field
      (using (plus (not-one-of [\newline \tab \space])) stringify)
      non-breaking-ws))
-   :using (fn [x]
-            (let [res {:description (map (fn [x] (if (string? x)
-                                                   (trim x)
-                                                   x))
-                                         (str-accumulate (filter (comp not custom-field?) x)))}
-                  fields (filter custom-field? x)]
-              (if (empty? fields)
-                res
-                (assoc res :fields (apply merge fields)))))))
+   :contextually-using (fn [c x]
+                         (let [res {:description (map (fn [y] (if (string? y)
+                                                                (trim y)
+                                                                y))
+                                                      (str-accumulate (filter (comp not custom-field?) x)))
+                                    :line-number (:line-number c)
+                       ; TODO FIXME
+                                    }
+                               fields (filter custom-field? x)]
+                           (if (empty? fields)
+                             res
+                             (assoc res :fields (apply merge fields)))))))
 
 (def todo-line
   (parser
@@ -192,100 +196,160 @@
    :attributes {}
    :children []})
 
-(defn completion-cell [todo]
-  (if (and (contains? todo :complete)
-           (:complete todo))
-    (assoc cell :children [{:type "raw" :html "&#x2611;"}])
-    (assoc cell :children [{:type "raw" :html "&#x2610;"}])))
+(def table
+  {:type "element"
+   :tag "table"
+   :children []})
 
-(defn priority-cell [todo]
-  (assoc cell :children [{:type "text" :text (:priority todo)}]))
+(def checkbox
+  {:type "todo-tickbox"
+   :attributes {"checked" {:type "string" "value" "false"}
+                "line-number" {:type "string" "value" ""}}})
 
-(defn completion-date-cell [todo]
-  (if (contains? todo :completion-date)
-    (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:completion-date todo))}])
-    (assoc cell :children [{:type "text" :text ""}])))
+(defn completion-cell [_ todo]
+  (let [widget (-> checkbox
+                   (assoc-in [:attributes "line-number" "value"] (:line-number todo)))]
 
-(defn creation-date-cell [todo]
-  (if (contains? todo :creation-date)
-    (assoc cell :children [{:type "text" :text (tf/unparse (tf/formatters :date) (:creation-date todo))}])
-    (assoc cell :children [{:type "text" :text ""}])))
+    (assoc cell :children [(if (and (contains? todo :complete)
+                                    (:complete todo))
+                             (assoc-in widget [:attributes "checked" "value"] "true")
+                             widget)]
+           :attributes {"class" {:type "string" :value "todo-complete-cell"}})))
+
+(defn priority-cell [_ todo]
+  (assoc cell
+         :children [{:type "text" :text (:priority todo)}]
+         :attributes {"class" {:type "string" :value "todo-priority-cell"}}))
+
+(defn completion-date-cell [_ todo]
+  (assoc cell :children 
+    (if (contains? todo :completion-date)
+      [{:type "text" :text (tf/unparse (tf/formatters :date) (:completion-date todo))}]
+      [{:type "text" :text ""}])
+  :attributes {"class" {:type "string" :value "todo-completion-date-cell"}}))
+
+(defn creation-date-cell [_ todo]
+  (assoc cell
+         :children 
+          (if (contains? todo :creation-date)
+            [{:type "text" :text (tf/unparse (tf/formatters :date) (:creation-date todo))}]
+            [{:type "text" :text ""}])
+         :attributes {"class" {:type "string" :value "todo-creation-date-cell"}}))
 
 (defn span-text [txt cls]
   (-> span
-      (assoc-in [:attributes "class"] cls)
+      (assoc :attributes {"class" {:type "string" :value cls}})
       (assoc :children [(assoc text :text (str txt " "))])))
 
-(defn description-cell [todo]
-  (letfn [(descr-inner [todo fragments]
+(defn project-tag? [x]
+  (and (map? x)
+       (contains? x :project)))
+
+(defn context-tag? [x]
+  (and (map? x)
+       (contains? x :context)))
+
+(defn description-cell [config todo]
+  (letfn [(descr-inner [fragments todo]
             (let [elem (first todo)]
               (cond
                 (empty? todo) fragments
                 (string? elem)
-                (recur (rest todo)
-                       (cons (assoc text :text (str elem " "))
-                             fragments))
+                (recur (cons (assoc text :text (str elem " "))
+                             fragments)
+                       (rest todo))
                 (contains? elem :project)
-                (recur (rest todo)
-                       (cons (span-text (:project elem) "todo-project")
-                             fragments))
+                (recur (cons (span-text (:project elem) "todo-project")
+                             fragments)
+                       (rest todo))
                 (contains? elem :context)
-                (recur (rest todo)
-                       (cons (span-text (:context elem) "todo-context")
-                             fragments))
-                ; This exhausts valid options. If not, an error seems fair.
-                )))]
-    (assoc cell :children
-           (reverse (descr-inner (:description todo) [])))))
+                (recur (cons (span-text (:context elem) "todo-context")
+                             fragments)
+                       (rest todo)))))
+          (prefilter-descr [config el]
+            (cond
+              (and (project-tag? el)
+                   (not (get config "showProjectsInDescription"))) false
+              (and (context-tag? el)
+                   (not (get config "showContextsInDescription"))) false
+              :else true))]
+    (assoc cell
+           :children
+           (->> todo
+                :description
+                (filter (partial prefilter-descr config))
+                (descr-inner [])
+                reverse)
+           :attributes
+           {"class" {:type "string" :value "todo-description-cell"}})))
+
+(defn context-cell [_ todo]
+  (letfn [(project-cell-inner [prj]
+            (span-text (:context prj) "todo-project"))]
+    (assoc cell
+           :children
+           (map project-cell-inner (filter context-tag? (:description todo)))
+           :attributes
+           {"class" {:type "string" :value "todo-context-cell"}})))
+
+(defn project-cell [_ todo]
+  (letfn [(project-cell-inner [prj]
+            (span-text (:project prj) "todo-project"))]
+    (assoc cell
+           :children
+           (map project-cell-inner (filter project-tag? (:description todo)))
+           :attributes
+           {"class" {:type "string" :value "todo-project-cell"}})))
 
 (def column-formatters
   {"complete" completion-cell
    "priority" priority-cell
    "creation-date" creation-date-cell
    "completion-date" completion-date-cell
-   "description" description-cell})
+   "description" description-cell
+   "project" project-cell
+   "context" context-cell})
 
 (defn custom-column-cell [col todo]
-  (assoc cell :children [(assoc text :text (get (get todo :fields) col))]))
+  (assoc cell
+         :children [(assoc text :text (get (get todo :fields) col))]
+         :attributes
+         {"class" {:type "string" :value (str "todo-" col "-cell")}}))
 
 (defn convert-todo [config todo]
   (assoc row
+         :attributes
+         {"class" {:type "string" :value "todo-row"}}
          :children
          (map (fn [col]
                 (if (contains? column-formatters col)
-                  (apply (get column-formatters col) [todo])
+                  (apply (get column-formatters col) [config todo])
                   (custom-column-cell col todo)))
               (get config "columns"))))
-
-(def default-column-names
-  {"complete" "Complete?"
-   "priority" "Priority"
-   "creation-date" "Created"
-   "completion-date" "Completed"
-   "description" "Description"})
 
 (defn build-header [config todos]
   (letfn [(add-cell [col]
             (assoc cell
                    :children
-                   [{:type "text" :text (get default-column-names col col)}]))]
-
+                   [{:type "text" :text (get (get config "columnLabels") col col)}]
+                  :attributes
+                  {"class" {:type "string" :value (str "todo-header-cell todo-header-" col "-cell")}}))]
     [{:type "element" :tag "thead"
-      :children [{:type "element" :tag "tr"
-                  :children (map add-cell (get config "columns"))}]}]))
-
-(def header
-  {:type "element"
-   :tag "table"
-   :children []})
+      :children [{:type "element"
+                  :tag "tr"
+                  :children (map add-cell (get config "columns"))
+                  :attributes
+                  {"class" {:type "string" :value "todo-header-row"}}}]}]))
 
 (defn convert-parse-tree [config todos]
   (if (empty? todos)
     [{:type "text" :text "Nothing to do!"}]
-    [(assoc header
+    [(assoc table
             :children
             (concat  (build-header config todos)
-                     (map (partial convert-todo config) todos)))]))
+                     (map (partial convert-todo config) todos))
+            :attributes
+            {"class" {:type "string" :value "todo-table"}})]))
 
 (defn ^:export parse-todos [text]
   (clj->js (apply-parser todos text)))
@@ -296,3 +360,50 @@
        result
        (convert-parse-tree (js->clj config))
        clj->js))
+
+; Formatting functions
+
+(defn ^:export current-date [] (tc/now))
+
+(defn ^:export todo-to-text
+  [todos]
+  (letfn [(coalesce-date [d]
+            (if (nil? d)
+              nil
+              (tf/unparse (tf/formatters :date) d)))
+
+          (str-desc [desc res]
+            (cond
+              (empty? desc) res
+              (string? (first desc))
+              (recur (rest desc) (cons (first desc) res))
+              (project-tag? (first desc))
+              (recur (rest desc) (cons (str "+" (:project (first desc))) res))
+              (context-tag? (first desc))
+              (recur (rest desc) (cons (str "@" (:context (first desc))) res))))
+
+          (coalesce-pri [p]
+            (if (nil? p)
+              p
+              (str "(" p ")")))
+
+          (coalesce-complete [c]
+            (if (or (nil? c) (not c))
+              nil
+              "x"))
+
+          (format-field [f]
+            (str (name (first f)) ":" (second f)))
+
+          (fmt-todo [t]
+            (let [base
+                  [(coalesce-complete (:complete t))
+                   (coalesce-pri (:priority t))
+                   (coalesce-date (:completion-date t))
+                   (coalesce-date (:creation-date t))
+                   (apply str (interpose " " (reverse (str-desc (:description t) []))))]
+                  fields (interpose " " (map format-field (:fields t)))]
+              (apply str (interpose " " (filter (comp not nil?) (concat base fields))))))]
+
+    (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))))
+

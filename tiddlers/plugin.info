@@ -3,7 +3,7 @@
 	"description": "TODO.txt utilities.",
 	"name":"TODO.txt",
 	"author": "Michael McDermott",
-	"version": "0.2.2",
+	"version": "0.3.1",
 	"core-version": ">=5.1.22",
 	"source": "https://github.com/michaeljmcd/todotxt-TW5",
 	"list": "readme example license",

@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [edessa.parser :refer [apply-parser make-input success? result]]
             [clojure.pprint :refer [pprint]]
+            [clojure.string :refer [trim]]
             [taoensso.timbre :as t :refer [debug error info merge-config!]]
             [cljs-time.extend :as te]
             [cljs-time.core :as tc]
@@ -18,23 +19,23 @@
   (let [inp (make-input (load-resource "test-resources/simple.txt"))
         res (apply-parser c/todos inp)]
     (is (success? res))
-    (is (= '({:priority "A" :description ["Fix your stuff dude."]}
-             {:priority "Z" :description ["Get ice cream."]})
+    (is (= '({:priority "A" :description ["Fix your stuff dude."] :line-number 0}
+             {:priority "Z" :description ["Get ice cream."] :line-number 1})
            (result res)))))
 
 (deftest custom-field-file-test
   (let [inp (make-input (load-resource "test-resources/custom-field.txt"))
         res (apply-parser c/todos inp)]
     (is (success? res))
-    (is (= '({:priority "Z" :description ["Do something."] :fields {"due" "2022-01-01" "BADGE" "fOO"}}
-             {:priority "B" :description ["Do something else!"] :fields {"due" "2022-03-01"}})
+    (is (= '({:priority "Z" :description ["Do something."] :fields {"due" "2022-01-01" "BADGE" "fOO"} :line-number 0}
+             {:priority "B" :description ["Do something else!"] :fields {"due" "2022-03-01"} :line-number 1})
            (result res)))))
 
 (deftest simple-line-test
   (let [inp (make-input "(A) test")
         res (apply-parser c/todo-line inp)]
     (is (success? res))
-    (is (= '({:priority "A" :description ["test"]})
+    (is (= '({:priority "A" :description ["test"] :line-number 0})
            (result res)))))
 
 (deftest tagged-line
@@ -42,6 +43,7 @@
         r (apply-parser c/todo-line inp)]
     (is (success? r))
     (is (= '[{:priority "D"
+              :line-number 0
               :description ["test"
                             {:project "todo"}
                             "in the"
@@ -52,6 +54,7 @@
         r (apply-parser c/todo-line inp)]
     (is (success? r))
     (is (= '[{:priority "D"
+              :line-number 0
               :description [{:project "todo"}
                             "test in the"
                             {:context "cli"}]}]
@@ -61,6 +64,7 @@
         r (apply-parser c/todo-line inp)]
     (is (success? r))
     (is (= '[{:priority "D"
+              :line-number 0
               :description ["add 1 + 2"]}]
            (result r)))))
 
@@ -132,15 +136,44 @@
 
 (deftest description-generation
   (let [todo {:description ["something about" {:project "myproject"} "you see"]}
-        r (c/description-cell todo)]
+        config {"showProjectsInDescription" true "showContextsInDescription" true}
+        r (c/description-cell config todo)]
     (is (= {:type "element"
             :tag "td"
-            :children [
-              {:type "text" :text "something about "}
-              {:type "element"
-               :tag "span"
-               :attributes {"class" "todo-project"}
-               :children [{:type "text" :text "myproject "}]}
-              {:type "text" :text "you see "}
-            ]}
+            :attributes {"class" {:type "string" :value "todo-description-cell"}}
+            :children [{:type "text" :text "something about "}
+                       {:type "element"
+                        :tag "span"
+                        :attributes {"class" {:type "string" :value "todo-project"}}
+                        :children [{:type "text" :text "myproject "}]}
+                       {:type "text" :text "you see "}]}
            r))))
+
+(deftest hide-description-tags
+  (let [todo {:description ["something something" {:project "asdf"} " " {:context "def"}]}
+        config {"showProjectsInDescription" false "showContextsInDescription" false}
+        r (c/description-cell config todo)]
+    (is (= {:type "element"
+            :tag "td"
+            :children [{:type "text" :text "something something "}
+                       {:type "text" :text "  "}]}))))
+
+(deftest completion-cell-generation
+  (let [todo {:description ["something about" {:project "myproject"} "you see"] :line-number 7}
+        config {"showProjectsInDescription" true "showContextsInDescription" true}
+        r (c/completion-cell config todo)]
+    (is (= {:type "element"
+            :tag "td"
+            :attributes {"class" {:type "string" :value "todo-complete-cell"}}
+            :children [{:type "todo-tickbox"
+                        :attributes {"checked" {:type "string" "value" "false"}
+                                     "line-number" {:type "string" "value" 7}}}]}
+           r))))
+
+; Formatting tests
+(deftest todo-to-text-tests
+  (let [inp (make-input (load-resource "test-resources/simple.txt"))
+        todos (:result (apply-parser c/todos inp))
+        str-todos (c/todo-to-text todos)]
+    (is (= (trim (load-resource "test-resources/simple.txt"))
+           str-todos))))
