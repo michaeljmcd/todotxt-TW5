@@ -286,14 +286,20 @@
 (defn context-cell [_ todo]
   (letfn [(project-cell-inner [prj]
             (span-text (:context prj) "todo-project"))]
-    (assoc cell :children
-           (map project-cell-inner (filter context-tag? (:description todo))))))
+    (assoc cell
+           :children
+           (map project-cell-inner (filter context-tag? (:description todo)))
+           :attributes
+           {"class" {:type "string" :value "todo-context-cell"}})))
 
 (defn project-cell [_ todo]
   (letfn [(project-cell-inner [prj]
             (span-text (:project prj) "todo-project"))]
-    (assoc cell :children
-           (map project-cell-inner (filter project-tag? (:description todo))))))
+    (assoc cell
+           :children
+           (map project-cell-inner (filter project-tag? (:description todo)))
+           :attributes
+           {"class" {:type "string" :value "todo-project-cell"}})))
 
 (def column-formatters
   {"complete" completion-cell
@@ -305,10 +311,15 @@
    "context" context-cell})
 
 (defn custom-column-cell [col todo]
-  (assoc cell :children [(assoc text :text (get (get todo :fields) col))]))
+  (assoc cell
+         :children [(assoc text :text (get (get todo :fields) col))]
+         :attributes
+         {"class" {:type "string" :value (str "todo-" col "-cell")}}))
 
 (defn convert-todo [config todo]
   (assoc row
+         :attributes
+         {"class" {:type "string" :value "todo-row"}}
          :children
          (map (fn [col]
                 (if (contains? column-formatters col)
@@ -320,11 +331,15 @@
   (letfn [(add-cell [col]
             (assoc cell
                    :children
-                   [{:type "text" :text (get (get config "columnLabels") col col)}]))]
-
+                   [{:type "text" :text (get (get config "columnLabels") col col)}]
+                  :attributes
+                  {"class" {:type "string" :value (str "todo-header-cell todo-header-" col "-cell")}}))]
     [{:type "element" :tag "thead"
-      :children [{:type "element" :tag "tr"
-                  :children (map add-cell (get config "columns"))}]}]))
+      :children [{:type "element"
+                  :tag "tr"
+                  :children (map add-cell (get config "columns"))
+                  :attributes
+                  {"class" {:type "string" :value "todo-header-row"}}}]}]))
 
 (defn convert-parse-tree [config todos]
   (if (empty? todos)
@@ -332,7 +347,9 @@
     [(assoc table
             :children
             (concat  (build-header config todos)
-                     (map (partial convert-todo config) todos)))]))
+                     (map (partial convert-todo config) todos))
+            :attributes
+            {"class" {:type "string" :value "todo-table"}})]))
 
 (defn ^:export parse-todos [text]
   (clj->js (apply-parser todos text)))

@@ -168,7 +168,6 @@
             :children [{:type "todo-tickbox"
                         :attributes {"checked" {:type "string" "value" "false"}
                                      "line-number" {:type "string" "value" 7}}}]}
-
            r))))
 
 ; Formatting tests
