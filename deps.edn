@@ -3,10 +3,7 @@
         thheller/shadow-cljs {:mvn/version "2.20.14"}
         com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
         github-michaeljmcd/edessa {:git/url "https://github.com/michaeljmcd/edessa"
-                                   ; :sha "955bf6f37f2e4c673b5a1b42778a42edfd7848d2"
-                                   :sha "5610465d68dfbfc82b412abe1a142d871a52d17e"
-                                   }
-        }
+                                   :sha "5610465d68dfbfc82b412abe1a142d871a52d17e"}}
  :aliases {
             :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "2.2.970"}}
                      :main-opts ["-m" "antq.core"]}
