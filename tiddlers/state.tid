@@ -1,0 +1,10 @@
+title: $:/plugins/michaeljmcd/todotxt/state
+name: TODO.txt UI State
+type: application/json
+description: UI state for TODO tiddlers.
+
+{
+    "$:/plugins/michaeljmcd/todotxt/example": {
+        "sort": {"complete": "asc"}
+    }
+}

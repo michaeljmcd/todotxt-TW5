@@ -2,6 +2,6 @@ title: $:/plugins/michaeljmcd/todotxt/example
 type: text/x-todo
 
 (Z) Do something. Due:2022-01-01 BADGE:fOO
-(B) Do something else! due:2022-03-01
 x (B) 2023-01-03 Schedule meeting for +project1
+(B) Do something else! due:2022-03-01
 x (A) 2022-04-07 2022-04-06 Call caterer. @planning BADGE:BAZ

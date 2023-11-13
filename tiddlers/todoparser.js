@@ -13,7 +13,7 @@ Registers todo.core as a parser for tiddlywiki.
   var opts = JSON.parse($tw.wiki.getTiddlerText("$:/plugins/michaeljmcd/todotxt/config"));
 
   var TodoParser = function(type, text, options) {
-    this.tree = todo.core.todo_to_wiki(text, opts);
+      this.tree = todo.core.todo_to_wiki(text, opts);
   };
 
   exports["text/x-todo"] = TodoParser;

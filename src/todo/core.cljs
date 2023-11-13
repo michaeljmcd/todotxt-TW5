@@ -206,6 +206,11 @@
    :attributes {"checked" {:type "string" "value" "false"}
                 "line-number" {:type "string" "value" ""}}})
 
+(def columnsort
+ {:type "todo-columnsort"
+  :attributes {"column-name" {:type "string" "value" nil}
+               "column-description" {:type "string" "value" nil}}})
+
 (defn completion-cell [_ todo]
   (let [widget (-> checkbox
                    (assoc-in [:attributes "line-number" "value"] (:line-number todo)))]
@@ -331,7 +336,8 @@
   (letfn [(add-cell [col]
             (assoc cell
                    :children
-                   [{:type "text" :text (get (get config "columnLabels") col col)}]
+                   [(assoc-in (assoc-in columnsort [:attributes "column-name" "value"] col) [:attributes "column-description" "value"] (get (get config "columnLabels") col col))
+                   ]
                   :attributes
                   {"class" {:type "string" :value (str "todo-header-cell todo-header-" col "-cell")}}))]
     [{:type "element" :tag "thead"
@@ -407,3 +413,17 @@
 
     (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))))
 
+(defn todo-comparator [sortspec t1 t2]
+ (let [dir (get sortspec (first (keys sortspec)))
+       field (first (keys sortspec))]
+    (if (= "asc" dir)
+     (compare (get t1 field)
+        (get t2 field))
+     (* -1 (compare (get t1 field)
+         (get t2 field))))))
+
+(defn ^:export sort-todos [todos sortspec]
+ (let [result
+  (sort (partial todo-comparator (js->clj sortspec)) (js->clj todos))]
+     (clj->js result)
+ ))

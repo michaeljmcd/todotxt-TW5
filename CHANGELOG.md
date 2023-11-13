@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added 
 
 - WikiText support in todo descriptions.
+- Ability to sort list by a single column.
 
 ## [0.3.1]
 
