@@ -31,17 +31,17 @@ ColumnSortWidget.prototype.render = function(parent,nextSibling) {
     var state = JSON.parse($tw.wiki.getTiddlerText("$:/plugins/michaeljmcd/todotxt/state"))[this.todoTiddler];
 
     if (state === null || state === undefined) {
-        state = {};
+        state = {'sort': {}};
     }
 
 	this.inputNode = this.document.createElement("a");
 	this.inputNode.setAttribute("class", "todo-columnsort");
 
     var linkText = this.columnDescription;
-    if (state.sort[this.columnName] === "asc") {
+    if (state['sort'][this.columnName] === "asc") {
         linkText += "\u25B2";
     }
-    if (state.sort[this.columnName] === "desc") {
+    if (state['sort'][this.columnName] === "desc") {
         linkText += "\u25BC";
     }
 
@@ -60,6 +60,12 @@ ColumnSortWidget.prototype.execute = function() {
     this.columnDescription = this.getAttribute("column-description");
 	this.todoTiddler = this.getVariable("currentTiddler");
 
+    var draftTitle = $tw.wiki.getTiddler(this.todoTiddler).fields["draft.of"];
+
+    if (draftTitle !== null && draftTitle !== undefined) {
+        this.todoTiddler = draftTitle;
+    }
+
 	// Make the child widgets
 	this.makeChildWidgets();
 };
@@ -74,15 +80,18 @@ ColumnSortWidget.prototype.handleChangeEvent = function(e) {
     var newSort = {};
     newSort[this.columnName] = "asc";
 
-    if (state[this.todoTiddler]['sort'][this.columnName] === "asc") {
-        newSort[this.columnName] = "desc";
-    } else if (state[this.todoTiddler]['sort'][this.columnName] === "desc") {
-        newSort[this.columnName] = "asc";
-    } else {
-        newSort[this.columnName] = "asc";
-    }
+    if (state[this.todoTiddler] && state[this.todoTiddler]['sort']) {
+        if (state[this.todoTiddler]['sort'][this.columnName] === "asc") {
+            newSort[this.columnName] = "desc";
+        } else if (state[this.todoTiddler]['sort'][this.columnName] === "desc") {
+            newSort[this.columnName] = "asc";
+        } 
 
-    state[this.todoTiddler]['sort'] = newSort;
+        state[this.todoTiddler]['sort'] = newSort;
+    } else {
+        state[this.todoTiddler] = {};
+        state[this.todoTiddler]['sort'] = newSort;
+    }
 
 	var tiddler = this.wiki.getTiddler(this.todoTiddler);
 
