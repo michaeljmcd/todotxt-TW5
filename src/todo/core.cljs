@@ -419,19 +419,23 @@
   (tco/to-long v1)
   v1))
 
+(defn extract-field [t1 field]
+ (case field
+    "project" (apply str (sort (map #(:project %) (filter project-tag? (:description t1)))))
+    "context" (apply str (sort (map #(:context %) (filter context-tag? (:description t1)))))
+    :else (get t1 field)))
+
 (defn todo-comparator [sortspec t1 t2]
  (let [dir (get sortspec (first (keys sortspec)))
-       field (first (keys sortspec))]
+       field (first (keys sortspec))
+       value1 (unwrap-date (extract-field t1 field))
+       value2 (unwrap-date (extract-field t2 field))]
     (if (= "asc" dir)
-     (compare 
-        (unwrap-date (get t1 field))
-        (unwrap-date (get t2 field)))
-     (* -1 (compare 
-             (unwrap-date (get t1 field))
-             (unwrap-date (get t2 field)))))))
+     (compare value1 value2)
+     (* -1 (compare value1 value2)))))
 
 (defn ^:export sort-todos [todos sortspec]
  (let [result
-  (sort (partial todo-comparator (js->clj sortspec)) (js->clj todos))]
+  (sort (partial todo-comparator (js->clj sortspec)) (js->clj todos  :keywordize-keys true))]
      (clj->js result)
  ))
