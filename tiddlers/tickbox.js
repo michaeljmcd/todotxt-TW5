@@ -65,6 +65,7 @@ TickboxWidget.prototype.handleChangeEvent = function(e) {
 		}
 
 		$tw.wiki.setText(this.todoTiddler, "text", null, todo.core.todo_to_text(todos));
+        $tw.rootWidget.dispatchEvent({type: "tm-auto-save-wiki"});
 	}
 };
 

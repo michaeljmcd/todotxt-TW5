@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - WikiText support in todo descriptions.
 - Ability to sort list by a single column.
+- Changes to tiddler state (like sorting or marking a task done) now trigger
+  autosave.
 
 ## [0.3.1]
 
