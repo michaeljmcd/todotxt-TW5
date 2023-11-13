@@ -423,7 +423,7 @@
  (case field
     "project" (apply str (sort (map #(:project %) (filter project-tag? (:description t1)))))
     "context" (apply str (sort (map #(:context %) (filter context-tag? (:description t1)))))
-    :else (get t1 field)))
+    (get t1 (keyword field))))
 
 (defn todo-comparator [sortspec t1 t2]
  (let [dir (get sortspec (first (keys sortspec)))
