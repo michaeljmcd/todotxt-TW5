@@ -64,6 +64,11 @@ TickboxWidget.prototype.handleChangeEvent = function(e) {
 			}
 		}
 
+        var state = JSON.parse($tw.wiki.getTiddlerText("$:/plugins/michaeljmcd/todotxt/state"));
+        if (state[this.todoTiddler] && state[this.todoTiddler]['sort']) {
+            todos = todo.core.sort_todos(todos, state[this.todoTiddler]['sort'])
+        }
+
 		$tw.wiki.setText(this.todoTiddler, "text", null, todo.core.todo_to_text(todos));
         $tw.rootWidget.dispatchEvent({type: "tm-auto-save-wiki"});
 	}
