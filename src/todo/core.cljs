@@ -3,7 +3,8 @@
             [taoensso.timbre :as t :refer [debug error info merge-config!]]
             [clojure.string :refer [trim]]
             [cljs-time.format :as tf]
-            [cljs-time.core :as tc]))
+            [cljs-time.core :as tc]
+            [cljs-time.coerce :as tco]))
 
 ; The main goal here is to write a plugin that can parser [TODO.txt](https://github.com/todotxt/todo.txt)
 ; and render it as HTML within TiddlyWiki 5. This module will have all of the
@@ -413,14 +414,21 @@
 
     (apply str (interpose \newline (map fmt-todo (js->clj todos :keywordize-keys true))))))
 
+(defn unwrap-date [v1]
+ (if (tc/date? v1)
+  (tco/to-long v1)
+  v1))
+
 (defn todo-comparator [sortspec t1 t2]
  (let [dir (get sortspec (first (keys sortspec)))
        field (first (keys sortspec))]
     (if (= "asc" dir)
-     (compare (get t1 field)
-        (get t2 field))
-     (* -1 (compare (get t1 field)
-         (get t2 field))))))
+     (compare 
+        (unwrap-date (get t1 field))
+        (unwrap-date (get t2 field)))
+     (* -1 (compare 
+             (unwrap-date (get t1 field))
+             (unwrap-date (get t2 field)))))))
 
 (defn ^:export sort-todos [todos sortspec]
  (let [result
